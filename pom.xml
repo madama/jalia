@@ -5,7 +5,7 @@
 	<artifactId>jalia</artifactId>
 	<version>0.2.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
-	<url>https://github.com/EtaliaSA/jalia</url>
+	<url>https://github.com/madama/jalia</url>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -63,10 +63,6 @@
 			</plugin>
 		</plugins>
 	</build>
-	<organization>
-		<name>Etalia SA</name>
-		<url>http://www.etalia.net</url>
-	</organization>
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -76,43 +72,7 @@
 		</license>
 	</licenses>
 	<repositories>
-		<repository>
-			<id>etalia-public</id>
-			<name>Etalia Public Release</name>
-			<url>http://repo.etalia.net/artifactory/public</url>
-			<layout>default</layout>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>etalia-public-snapshot</id>
-			<name>Etalia Public Snapshot</name>
-			<url>http://repo.etalia.net/artifactory/public-snapshot</url>
-			<layout>default</layout>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
 	</repositories>
 	<distributionManagement>
-		<repository>
-			<id>etalia-public</id>
-			<name>Etalia Public Release</name>
-			<url>http://repo.etalia.net/artifactory/public</url>
-			<layout>default</layout>
-		</repository>
-		<snapshotRepository>
-			<id>etalia-public-snapshot</id>
-			<name>Etalia External Snapshot</name>
-			<url>http://repo.etalia.net/artifactory/public-snapshot</url>
-			<layout>default</layout>
-		</snapshotRepository>
 	</distributionManagement>
 </project>
