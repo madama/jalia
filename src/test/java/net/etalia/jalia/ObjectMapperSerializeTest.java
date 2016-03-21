@@ -4,7 +4,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertThat;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -13,6 +12,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.etalia.jalia.JsonClassData;
 import net.etalia.jalia.ObjectMapper;
@@ -20,6 +21,7 @@ import net.etalia.jalia.OutField;
 import net.etalia.jalia.DummyAddress.AddressType;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class ObjectMapperSerializeTest {
@@ -385,6 +387,15 @@ public class ObjectMapperSerializeTest {
 		assertTrue("Expecting a 'p1' followed by 'p2' followed by 'p1' again", fp1 < fp2 && fp2 < sp1);
 	}
 	
+	private int countOccurrencies(String pattern, String in) {
+		Pattern pat = Pattern.compile(pattern);
+        Matcher mat = pat.matcher(in);
+
+        int count = 0;
+        while (mat.find()) count++;
+        return count;
+	}
+	
 	@Test
 	public void sameInstanceEmbedded() throws Exception {
 		DummyPerson person1 = new DummyPerson();
@@ -423,12 +434,16 @@ public class ObjectMapperSerializeTest {
 			String json = null;
 			json = om.writeValueAsString(map);
 			System.out.println(json);
-			assertThat(json,containsString("\"kp2_2\":{"));
-			assertThat(json,containsString("\"friends\":[{"));
-			assertThat(json,containsString("\"kp1_2\":\"p1"));
-			assertThat(json,containsString("\"kp1\":\"p1"));
-			assertThat(json,containsString("\"kp2\":\"p2"));
-			assertThat(json,containsString("\"kpl\":[\"p1"));
+			// Assert each p1 and p2 are serialized only once
+			assertThat(countOccurrencies("\"id\":\"p1\"", json),equalTo(1));
+			assertThat(countOccurrencies("\"id\":\"p2\"", json),equalTo(1));
+			
+			// Assert the others all have only the id
+			// p1 is in id:p1 when unrolled, then "p1" in the kpl list, then ["p1"] in friends of p2, then in kp1 and kp1_2
+			assertThat(countOccurrencies("\"p1\"", json), equalTo(5));
+			// p2 is in id:p2 when unrolled, then in kp2 and kp2_2
+			assertThat(countOccurrencies("\"p2\"", json), equalTo(3));
+
 			assertThat(json,containsString("\"kempty\":["));
 			assertThat(json,not(containsString("kloop")));
 		}
