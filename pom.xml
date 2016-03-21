@@ -81,7 +81,7 @@
 	<repositories>
 		<repository>
 			<id>repo.danysoft.org</id>
-			<url>s3://repo.danysoft.org.s3-website-eu-west-1.amazonaws.com/release</url>
+			<url>http://repo.danysoft.org.s3-website-eu-west-1.amazonaws.com</url>
 		</repository>
 	</repositories>
 	<distributionManagement>
