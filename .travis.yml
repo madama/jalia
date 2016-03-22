@@ -3,3 +3,6 @@ language: java
 install: true
 
 script: mvn deploy
+
+after_script: mvn site site:deploy
+
