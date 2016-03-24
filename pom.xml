@@ -130,12 +130,6 @@
 			<comments>A business-friendly OSS license</comments>
 		</license>
 	</licenses>
-	<repositories>
-		<repository>
-			<id>repo.danysoft.org</id>
-			<url>http://repo.danysoft.org.s3-website-eu-west-1.amazonaws.com</url>
-		</repository>
-	</repositories>
 	<distributionManagement>
 		<site>
 			<id>repo.danysoft.org</id>
