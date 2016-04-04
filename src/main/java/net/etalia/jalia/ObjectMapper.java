@@ -170,6 +170,10 @@ public class ObjectMapper {
 				}
 			} catch (NullPointerException e) {}
 		}
+		return deser;
+	}
+	
+	protected void cacheDeserializerFor(TypeUtil hint, JsonDeSer deser) {
 		if (hint != null) {
 			deserializers.lockWrite();
 			try {
@@ -178,7 +182,6 @@ public class ObjectMapper {
 				deserializers.unlockWrite();
 			}
 		}
-		return deser;
 	}
 	
 	public void writeValue(JsonWriter jsonOut, OutField fields, Object obj) {
@@ -243,7 +246,9 @@ public class ObjectMapper {
 		JsonDeSer deser = getDeserializerFor(ctx, hint);
 		if (deser == null) throw new IllegalStateException("Cannot find a JSON deserializer for " + pre + " " + hint + " at " + ctx.getStateLog());
 		try {
-			return deser.deserialize(ctx, pre, hint);
+			Object ret = deser.deserialize(ctx, pre, hint);
+			this.cacheDeserializerFor(hint, deser);
+			return ret;
 		} catch (Throwable t) {
 			// TODO we should understand if this exception comes directly from the deserializer or from another call to ObjectMapper before rethrowing
 			if (t instanceof IllegalStateException) throw (IllegalStateException)t;
