@@ -200,9 +200,17 @@ public class TypeUtil {
 	public boolean isDouble() {
 		return Double.class == getConcrete() || Double.TYPE == getConcrete();
 	}
+	
+	public boolean isFloat() {
+		return Float.class == getConcrete() || Float.TYPE == getConcrete();
+	}
 
 	public boolean isInteger() {
 		return Integer.class == getConcrete() || Integer.TYPE == getConcrete();
+	}
+
+	public boolean isShort() {
+		return Short.class == getConcrete() || Short.TYPE == getConcrete();
 	}
 	
 	public boolean isLong() {

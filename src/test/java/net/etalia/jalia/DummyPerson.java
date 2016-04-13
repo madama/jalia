@@ -29,6 +29,7 @@ public class DummyPerson extends DummyEntity {
 	private List<DummyPerson> friends = new ArrayList<>();
 	private DummyPerson bestFriend = null;
 	private Integer age = null;
+	private Float height = null;
 	private Boolean active = null;
 	
 	private Date birthDay;
@@ -111,6 +112,13 @@ public class DummyPerson extends DummyEntity {
 	}
 	public void setAge(Integer age) {
 		this.age = age;
+	}
+	
+	public Float getHeight() {
+		return height;
+	}
+	public void setHeight(Float height) {
+		this.height = height;
 	}
 	
 	public Boolean getActive() {

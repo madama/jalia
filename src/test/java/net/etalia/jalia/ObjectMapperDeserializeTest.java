@@ -171,6 +171,7 @@ public class ObjectMapperDeserializeTest {
 					"'name':'Mario',"+
 					"'surname':'Rossi'," +
 					"'age':21," +
+					"'height':5.2," +
 					"'active':true," +
 					"'addresses':[" +
 						"{" +
@@ -197,6 +198,7 @@ public class ObjectMapperDeserializeTest {
 		assertThat(person.getName(), equalTo("Mario"));
 		assertThat(person.getSurname(), equalTo("Rossi"));
 		assertThat(person.getAge(), equalTo(21));
+		assertThat(person.getHeight(), equalTo(5.2f));
 		assertThat(person.getActive(), equalTo(true));
 		assertThat(person.getBirthDay(), notNullValue());
 		assertThat(person.getBirthDay().getTime(), equalTo(1000l));

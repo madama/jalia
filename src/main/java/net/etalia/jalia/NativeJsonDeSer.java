@@ -139,8 +139,12 @@ public class NativeJsonDeSer implements JsonDeSer {
 				}
 			} else if (hint.isDouble()) {
 				ret = input.nextDouble();
+			} else if (hint.isFloat()) {
+				ret = (float)input.nextDouble();
 			} else if (hint.isInteger()) {
 				ret = input.nextInt();
+			} else if (hint.isShort()) {
+				ret = (short)input.nextInt();
 			} else if (hint.isLong()) {
 				ret = input.nextLong();
 			} else if (Date.class.isAssignableFrom(hint.getConcrete())) {
