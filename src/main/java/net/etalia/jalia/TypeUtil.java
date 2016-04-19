@@ -8,7 +8,9 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -239,6 +241,27 @@ public class TypeUtil {
 	public TypeUtil getArrayType() {
 		return get(getConcrete().getComponentType());
 	}
+	
+	public boolean isListOrSet() {
+		return (List.class.isAssignableFrom(this.getConcrete()) || Set.class.isAssignableFrom(this.getConcrete()));
+	}
+	
+	public TypeUtil getListOrSetType() {
+		TypeUtil inner = null;
+		if (List.class.isAssignableFrom(this.getConcrete())) {
+			inner = this.findReturnTypeOf("get", Integer.TYPE);
+		} else if (Set.class.isAssignableFrom(this.getConcrete())) {
+			inner = this.findParameterOf("add", 0);
+		}
+		return inner;
+	}
+	
+	public TypeUtil getArrayListOrSetType() {
+		if (this.isArray()) return this.getArrayType();
+		if (this.isListOrSet()) return this.getListOrSetType();
+		return null;
+	}
+	
 	
 	public static abstract class Specific<T> {
 		public T mockGet() {
