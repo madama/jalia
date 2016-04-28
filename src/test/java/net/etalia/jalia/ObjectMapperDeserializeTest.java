@@ -222,7 +222,8 @@ public class ObjectMapperDeserializeTest {
 					"'name':'Mario',"+
 					"'surname':'Rossi'," +
 					"'age':'21'," +
-					"'active':'true'" +
+					"'active':'true'," +
+					"'birthDay':'1000'" +
 				"}";
 		
 		ObjectMapper om = new ObjectMapper();
@@ -238,8 +239,29 @@ public class ObjectMapperDeserializeTest {
 		assertThat(person.getSurname(), equalTo("Rossi"));
 		assertThat(person.getAge(), equalTo(21));
 		assertThat(person.getActive(), equalTo(true));
+		assertThat(person.getBirthDay(), notNullValue());
+		assertThat(person.getBirthDay().getTime(), equalTo(1000l));
 	}
-	
+
+	@Test
+	public void simpleEntityWithISO8601Date() throws Exception {
+		String json = 
+				"{" +
+					"'@entity':'Person'," +
+					"'birthDay':'1979-03-05T07:31:22Z'" +
+				"}";
+		
+		ObjectMapper om = new ObjectMapper();
+		om.setEntityNameProvider(new DummyEntityProvider());
+		om.init();
+		Object val = om.readValue(json.replace("'", "\""));
+		
+		assertThat(val, notNullValue());
+		assertThat(val, instanceOf(DummyPerson.class));
+		
+		DummyPerson person = (DummyPerson) val;
+		assertThat(person.getBirthDay().getTime(), equalTo(289467082000l));
+	}
 	@Test
 	public void entityFromExisting() throws Exception {
 		String json = 

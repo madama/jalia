@@ -120,6 +120,19 @@ public class NativeJsonDeSer implements JsonDeSer {
 						ret = Double.parseDouble((String)ret);
 					} else if (hint.isBoolean()) {
 						ret = Boolean.parseBoolean((String)ret);
+					} else if (Date.class.isAssignableFrom(hint.getConcrete())) {
+						String dateStr = (String)ret;
+						Date d = null;
+						if (dateStr.indexOf('-') != -1) {
+							try {
+								d = javax.xml.bind.DatatypeConverter.parseDateTime(dateStr).getTime();
+							} catch (Exception e) {
+							}
+						}
+						if (d == null) {
+							d = new Date(Long.parseLong((String)ret));
+						}
+						ret = d;
 					} else {
 						throw new IllegalStateException("Found a string, but was expecting " + hint + " at " + context.getStateLog());
 					}
