@@ -116,8 +116,12 @@ public class NativeJsonDeSer implements JsonDeSer {
 						ret = Long.parseLong((String)ret);
 					} else if (hint.isInteger()) {
 						ret = Integer.parseInt((String)ret);
+					} else if (hint.isShort()) {
+						ret = Short.parseShort((String)ret);
 					} else if (hint.isDouble()) {
 						ret = Double.parseDouble((String)ret);
+					} else if (hint.isFloat()) {
+						ret = Float.parseFloat((String)ret);
 					} else if (hint.isBoolean()) {
 						ret = Boolean.parseBoolean((String)ret);
 					} else if (Date.class.isAssignableFrom(hint.getConcrete())) {
