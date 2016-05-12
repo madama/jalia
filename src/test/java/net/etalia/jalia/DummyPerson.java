@@ -21,6 +21,7 @@ public class DummyPerson extends DummyEntity {
 	private String surname;
 	
 	private List<DummyAddress> addresses = new ArrayList<>(); 
+	private DummyAddress mainAddress = null;
 	private Set<String> tags = new HashSet<>();
 	
 	private Map<String,Object> extraData = null;
@@ -59,6 +60,13 @@ public class DummyPerson extends DummyEntity {
 	
 	public List<DummyAddress> getAddresses() {
 		return addresses;
+	}
+	
+	public DummyAddress getMainAddress() {
+		return mainAddress;
+	}
+	public void setMainAddress(DummyAddress mainAddress) {
+		this.mainAddress = mainAddress;
 	}
 	
 	public Set<String> getTags() {

@@ -29,11 +29,15 @@ public class NativeJsonDeSer implements JsonDeSer {
 	
 	@Override
 	public int handlesDeserialization(JsonContext context, TypeUtil hint) {
+		if (hint != null && hint.isNumber()) return 10;
+		if (hint != null && hint.isCharSequence()) return 10;
+		if (hint != null && hint.isEnum()) return 10;
+		if (hint != null && hint.hasConcrete() && Class.class.isAssignableFrom(hint.getConcrete())) return 10;
 		JsonToken peek = null;
 		try {
 			peek = context.getInput().peek();
 		} catch (Exception e) {}
-		if (peek == JsonToken.NULL) return 10;
+		if (peek == JsonToken.NULL) return 5;
 		
 		if (hint != null && hint.hasConcrete()) {
 			return handlesSerialization(context, hint.getConcrete());

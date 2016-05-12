@@ -146,8 +146,8 @@ public class ObjectMapper {
 		return deser;
 	}
 
-	protected JsonDeSer getDeserializerFor(JsonContext context, TypeUtil hint) {
-		if (hint != null) {
+	protected JsonDeSer getDeserializerFor(JsonContext context, TypeUtil hint, boolean useCache) {
+		if (hint != null && useCache) {
 			MissHolder<JsonDeSer> holder = null;
 			deserializers.lockRead();
 			try {
@@ -178,6 +178,17 @@ public class ObjectMapper {
 			deserializers.lockWrite();
 			try {
 				deserializers.put(hint, new MissHolder<>(deser));
+			} finally {
+				deserializers.unlockWrite();
+			}
+		}
+	}
+	
+	protected void invalidateDeserializerCache(TypeUtil hint) {
+		if (hint != null) {
+			deserializers.lockWrite();
+			try {
+				deserializers.remove(hint);
 			} finally {
 				deserializers.unlockWrite();
 			}
@@ -242,19 +253,26 @@ public class ObjectMapper {
 	public Object readValue(JsonContext ctx, Object pre, TypeUtil hint) {
 		// Don't consider a hint == Object.class
 		if (hint != null && hint.getType().equals(Object.class)) hint = null;
-		
-		JsonDeSer deser = getDeserializerFor(ctx, hint);
-		if (deser == null) throw new IllegalStateException("Cannot find a JSON deserializer for " + pre + " " + hint + " at " + ctx.getStateLog());
-		try {
-			Object ret = deser.deserialize(ctx, pre, hint);
-			this.cacheDeserializerFor(hint, deser);
-			return ret;
-		} catch (Throwable t) {
-			// TODO we should understand if this exception comes directly from the deserializer or from another call to ObjectMapper before rethrowing
-			if (t instanceof IllegalStateException) throw (IllegalStateException)t;
-			throw new IllegalStateException("Error reading " + ctx.getStateLog(), t);
+
+		int retry = 0;
+		while (retry < 2) {
+			retry++;
+			JsonDeSer deser = getDeserializerFor(ctx, hint, retry <= 1);
+			if (deser == null) throw new IllegalStateException("Cannot find a JSON deserializer for " + pre + " " + hint + " at " + ctx.getStateLog());
+			try {
+				Object ret = deser.deserialize(ctx, pre, hint);
+				this.cacheDeserializerFor(hint, deser);
+				return ret;
+			} catch (Throwable t) {
+				if (retry == 1) {
+					// Maybe the deserializer cache is polluted, retry without considering cache
+					continue;
+				}
+				if (t instanceof IllegalStateException) throw (IllegalStateException)t;
+				throw new IllegalStateException("Error reading " + ctx.getStateLog(), t);
+			}
 		}
-		
+		throw new IllegalStateException("Error reading " + ctx.getStateLog() + " : retry loop broken");
 	}
 	
 	protected JsonContext createContext() {

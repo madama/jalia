@@ -633,4 +633,31 @@ public class ObjectMapperDeserializeTest {
 		assertThat(om.readValue("null", DummyPerson.class), nullValue());
 	}
 	
+	
+	@Test
+	public void pollutedDeSerCache() throws Exception {
+		ObjectMapper om = new ObjectMapper();
+		String json = 
+				"{" +
+						"'@entity':'Person'," +
+						"'mainAddress':null" +
+				"}";
+		om.readValue(json.replace("'", "\""), DummyPerson.class);
+		
+		
+		String json2 = 
+				"{" +
+						"'@entity':'Person'," +
+						"'mainAddress':" +
+							"{" +
+								"'@entity':'Address'," +
+								"'id':'a4'," +
+								"'type':'EMAIL'," +
+								"'address':'a@b.com'" +
+							"}"+
+				"}";
+		
+		om.readValue(json2.replace("'", "\""), DummyPerson.class);
+	}
+	
 }
