@@ -29,10 +29,12 @@ public class NativeJsonDeSer implements JsonDeSer {
 	
 	@Override
 	public int handlesDeserialization(JsonContext context, TypeUtil hint) {
-		if (hint != null && hint.isNumber()) return 10;
-		if (hint != null && hint.isCharSequence()) return 10;
-		if (hint != null && hint.isEnum()) return 10;
-		if (hint != null && hint.hasConcrete() && Class.class.isAssignableFrom(hint.getConcrete())) return 10;
+		if (hint != null && hint.hasConcrete()) {
+			if (hint.isNumber()) return 10;
+			if (hint.isCharSequence()) return 10;
+			if (hint.isEnum()) return 10;
+			if (Class.class.isAssignableFrom(hint.getConcrete())) return 10;
+		}
 		JsonToken peek = null;
 		try {
 			peek = context.getInput().peek();
