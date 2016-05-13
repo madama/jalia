@@ -254,25 +254,16 @@ public class ObjectMapper {
 		// Don't consider a hint == Object.class
 		if (hint != null && hint.getType().equals(Object.class)) hint = null;
 
-		int retry = 0;
-		while (retry < 2) {
-			retry++;
-			JsonDeSer deser = getDeserializerFor(ctx, hint, retry <= 1);
-			if (deser == null) throw new IllegalStateException("Cannot find a JSON deserializer for " + pre + " " + hint + " at " + ctx.getStateLog());
-			try {
-				Object ret = deser.deserialize(ctx, pre, hint);
-				this.cacheDeserializerFor(hint, deser);
-				return ret;
-			} catch (Throwable t) {
-				if (retry == 1) {
-					// Maybe the deserializer cache is polluted, retry without considering cache
-					continue;
-				}
-				if (t instanceof IllegalStateException) throw (IllegalStateException)t;
-				throw new IllegalStateException("Error reading " + ctx.getStateLog(), t);
-			}
+		JsonDeSer deser = getDeserializerFor(ctx, hint, false);
+		if (deser == null) throw new IllegalStateException("Cannot find a JSON deserializer for " + pre + " " + hint + " at " + ctx.getStateLog());
+		try {
+			Object ret = deser.deserialize(ctx, pre, hint);
+			this.cacheDeserializerFor(hint, deser);
+			return ret;
+		} catch (Throwable t) {
+			if (t instanceof IllegalStateException) throw (IllegalStateException)t;
+			throw new IllegalStateException("Error reading " + ctx.getStateLog(), t);
 		}
-		throw new IllegalStateException("Error reading " + ctx.getStateLog() + " : retry loop broken");
 	}
 	
 	protected JsonContext createContext() {
