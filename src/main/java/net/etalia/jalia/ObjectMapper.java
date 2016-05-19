@@ -208,11 +208,11 @@ public class ObjectMapper {
 	
 	public void writeValue(Object obj, JsonContext context) {
 		JsonDeSer deser = getSerializerFor(context, obj);
-		if (deser == null) throw new IllegalStateException("Cannot find a JSON serializer for " + obj + " at " + context.getStateLog());
+		if (deser == null) throw new JaliaException("Cannot find a JSON serializer for " + obj + " at " + context.getStateLog());
 		try {
 			deser.serialize(obj, context);
 		} catch (Throwable t) {
-			throw new IllegalStateException("Error writing " + context.getStateLog(), t);
+			throw new JaliaException("Error writing " + context.getStateLog(), t);
 		}
 	}
 	
@@ -233,20 +233,21 @@ public class ObjectMapper {
 		} catch (MalformedJsonException mje) {
 			valid = false;
 		} catch (IOException e) {
-			throw new IllegalArgumentException("Error reading input stream", e);
+			throw new JaliaException("Error reading input stream", e);
 		}
 		if (!valid) {
 			jsonIn.setLenient(true);
 			try {
 				return nativeDeSer.deserialize(ctx, pre, hint);
 			} catch (Exception e) {
-				throw new IllegalArgumentException("Error parsing raw value", e);
+				throw new JaliaException("Error parsing raw value", e);
 			}
 		}
 		try {
 			return readValue(ctx, pre, hint);
 		} catch (Exception e) {
-			throw new IllegalArgumentException("Error parsing " + ctx.getStateLog(), e);
+			if (e instanceof JaliaException) throw e;
+			throw new JaliaException("Error parsing " + ctx.getStateLog(), e);
 		}
 	}
 	
@@ -255,14 +256,14 @@ public class ObjectMapper {
 		if (hint != null && hint.getType().equals(Object.class)) hint = null;
 
 		JsonDeSer deser = getDeserializerFor(ctx, hint, false);
-		if (deser == null) throw new IllegalStateException("Cannot find a JSON deserializer for " + pre + " " + hint + " at " + ctx.getStateLog());
+		if (deser == null) throw new JaliaException("Cannot find a JSON deserializer for " + pre + " " + hint + " at " + ctx.getStateLog());
 		try {
 			Object ret = deser.deserialize(ctx, pre, hint);
 			this.cacheDeserializerFor(hint, deser);
 			return ret;
 		} catch (Throwable t) {
-			if (t instanceof IllegalStateException) throw (IllegalStateException)t;
-			throw new IllegalStateException("Error reading " + ctx.getStateLog(), t);
+			if (t instanceof JaliaException) throw (JaliaException)t;
+			throw new JaliaException("Error reading " + ctx.getStateLog(), t);
 		}
 	}
 	

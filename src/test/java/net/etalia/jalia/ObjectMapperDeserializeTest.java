@@ -10,7 +10,6 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertThat;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -21,6 +20,7 @@ import net.etalia.jalia.ObjectMapper;
 import net.etalia.jalia.TypeUtil;
 import net.etalia.jalia.DummyAddress.AddressType;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 public class ObjectMapperDeserializeTest {
@@ -73,7 +73,7 @@ public class ObjectMapperDeserializeTest {
 		assertThat(map, hasEntry("a2", 2));
 	}
 	
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected=JaliaException.class)
 	public void intMapError() throws Exception {
 		String json = "{ 'a1' : 1, 'a2' : 'ciao'}";
 		json = replaceQuote(json);
@@ -116,7 +116,7 @@ public class ObjectMapperDeserializeTest {
 		assertThat(list, contains(1,2,3));
 	}
 	
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected=JaliaException.class)
 	public void intListError() throws Exception {
 		String json = "[ 1, 2, 'ciao']";
 		json = replaceQuote(json);
@@ -244,6 +244,34 @@ public class ObjectMapperDeserializeTest {
 	}
 
 	@Test
+	public void simpleEntityWithEmptyStrings() throws Exception {
+		String json = 
+				"{" +
+					"'@entity':'Person'," +
+					"'name':'Mario',"+
+					"'surname':'Rossi'," +
+					"'age':''," +
+					"'active':''," +
+					"'birthDay':''" +
+				"}";
+		
+		ObjectMapper om = new ObjectMapper();
+		om.setEntityNameProvider(new DummyEntityProvider());
+		om.init();
+		Object val = om.readValue(json.replace("'", "\""));
+		
+		assertThat(val, notNullValue());
+		assertThat(val, instanceOf(DummyPerson.class));
+		
+		DummyPerson person = (DummyPerson) val;
+		assertThat(person.getName(), equalTo("Mario"));
+		assertThat(person.getSurname(), equalTo("Rossi"));
+		assertThat(person.getAge(), equalTo(null));
+		assertThat(person.getActive(), equalTo(null));
+		assertThat(person.getBirthDay(), nullValue());
+	}
+	
+	@Test
 	public void simpleEntityWithISO8601Date() throws Exception {
 		String json = 
 				"{" +
@@ -300,7 +328,7 @@ public class ObjectMapperDeserializeTest {
 		assertThat(person.getAddresses().get(0).getAddress(), equalTo("m.rossi@gmail.com"));
 	}
 	
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected=JaliaException.class)
 	public void wrongHint() throws Exception {
 		String json = 
 				"{" +
@@ -321,7 +349,7 @@ public class ObjectMapperDeserializeTest {
 		om.readValue(json.replace("'", "\""), new TypeUtil.Specific<Integer>(){}.type());
 	}
 	
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected=JaliaException.class)
 	public void wrongInnerType() throws Exception {
 		String json = 
 				"{" +
@@ -341,6 +369,30 @@ public class ObjectMapperDeserializeTest {
 		om.init();
 		om.readValue(json.replace("'", "\""));
 	}
+	
+	@Test
+	public void exceptionMessage() throws Exception {
+		String json = 
+				"{" +
+					"'@entity':'Person'," +
+					"'addresses':[" +
+						"{" +
+							"'type':'INVALID_TYPE'" +
+						"}"+
+					"]" +
+				"}";
+		
+		ObjectMapper om = new ObjectMapper();
+		om.setEntityNameProvider(new DummyEntityProvider());
+		om.init();
+		try {
+			om.readValue(json.replace("'", "\""));
+			Assert.fail("Should throw exception");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	
 	@Test
 	public void differentEntitiesInList() throws Exception {

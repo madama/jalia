@@ -117,32 +117,50 @@ public class NativeJsonDeSer implements JsonDeSer {
 						throw new IllegalStateException("Cannot deserialize a class " + ret  + " at " + context.getStateLog(), e);
 					}
 				} else if (!hint.isCharSequence()) {
-					// Check if it's possible to convert it
-					if (hint.isLong()) {
-						ret = Long.parseLong((String)ret);
-					} else if (hint.isInteger()) {
-						ret = Integer.parseInt((String)ret);
-					} else if (hint.isShort()) {
-						ret = Short.parseShort((String)ret);
-					} else if (hint.isDouble()) {
-						ret = Double.parseDouble((String)ret);
-					} else if (hint.isFloat()) {
-						ret = Float.parseFloat((String)ret);
-					} else if (hint.isBoolean()) {
-						ret = Boolean.parseBoolean((String)ret);
-					} else if (Date.class.isAssignableFrom(hint.getConcrete())) {
-						String dateStr = (String)ret;
-						Date d = null;
-						if (dateStr.indexOf('-') != -1) {
-							try {
-								d = javax.xml.bind.DatatypeConverter.parseDateTime(dateStr).getTime();
-							} catch (Exception e) {
+					if (hint.isNumber() || hint.isBoolean()) {
+						if (((String)ret).length() == 0) {
+							if (!hint.isNullable()) {
+								if (hint.isBoolean()) {
+									ret = false;
+								} else {
+									ret = 0;
+								}
+							} else {
+								ret = null;
+							}
+						} else {
+							// Check if it's possible to convert it
+							if (hint.isLong()) {
+								ret = Long.parseLong((String)ret);
+							} else if (hint.isInteger()) {
+								ret = Integer.parseInt((String)ret);
+							} else if (hint.isShort()) {
+								ret = Short.parseShort((String)ret);
+							} else if (hint.isDouble()) {
+								ret = Double.parseDouble((String)ret);
+							} else if (hint.isFloat()) {
+								ret = Float.parseFloat((String)ret);
+							} else if (hint.isBoolean()) {
+								ret = Boolean.parseBoolean((String)ret);
 							}
 						}
-						if (d == null) {
-							d = new Date(Long.parseLong((String)ret));
+					} else if (Date.class.isAssignableFrom(hint.getConcrete())) {
+						String dateStr = (String)ret;
+						if (dateStr.length() == 0) {
+							ret = null;
+						} else {
+							Date d = null;
+							if (dateStr.indexOf('-') != -1) {
+								try {
+									d = javax.xml.bind.DatatypeConverter.parseDateTime(dateStr).getTime();
+								} catch (Exception e) {
+								}
+							}
+							if (d == null) {
+								d = new Date(Long.parseLong((String)ret));
+							}
+							ret = d;
 						}
-						ret = d;
 					} else {
 						throw new IllegalStateException("Found a string, but was expecting " + hint + " at " + context.getStateLog());
 					}
