@@ -663,6 +663,5 @@ public class ObjectMapperSerializeTest {
 		assertThat(om.writeValueAsString(true), equalTo("true"));
 		assertThat(om.writeValueAsString(null), equalTo("null"));
 	}
-	
 
 }

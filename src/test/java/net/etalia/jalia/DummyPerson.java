@@ -1,5 +1,6 @@
 package net.etalia.jalia;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 
 import net.etalia.jalia.annotations.JsonRequireIdForReuse;
-import net.etalia.jalia.annotations.JsonIgnore;
 import net.etalia.jalia.annotations.JsonOnDemandOnly;
 import net.etalia.jalia.annotations.JsonSetter;
 
@@ -32,6 +32,7 @@ public class DummyPerson extends DummyEntity {
 	private Integer age = null;
 	private Float height = null;
 	private Boolean active = null;
+	private BigDecimal balance = null;
 	
 	private Date birthDay;
 	
@@ -149,5 +150,11 @@ public class DummyPerson extends DummyEntity {
 	public void setBirthDay(Date birthDay) {
 		this.birthDay = birthDay;
 	}
-	
+	public BigDecimal getBalance() {
+		return balance;
+	}
+	public void setBalance(BigDecimal balance) {
+		this.balance = balance;
+	}
+
 }

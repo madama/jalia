@@ -11,6 +11,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.*;
 
+import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -711,5 +712,13 @@ public class ObjectMapperDeserializeTest {
 		
 		om.readValue(json2.replace("'", "\""), DummyPerson.class);
 	}
-	
+
+	@Test
+	public void bigDecimal() throws Exception {
+		ObjectMapper om = new ObjectMapper();
+		String json = "{'@entity':'Person','balance':70000.00}";
+		DummyPerson person = om.readValue(json.replace("'", "\""), DummyPerson.class);
+		assertTrue(person.getBalance().compareTo(new BigDecimal("70000.00")) == 0);
+	}
+
 }

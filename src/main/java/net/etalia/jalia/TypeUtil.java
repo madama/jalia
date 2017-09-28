@@ -6,6 +6,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -107,10 +108,10 @@ public class TypeUtil {
 		Type retType = resolveType(method.getGenericReturnType());
 		TypeUtil ret = null;
 		if (retType == null) {
-			returnTypes.put(key, new MissHolder<TypeUtil>(null));				
+			returnTypes.put(key, new MissHolder<TypeUtil>(null));
 		} else {
 			ret = get(retType);
-			returnTypes.put(key, new MissHolder<TypeUtil>(ret));				
+			returnTypes.put(key, new MissHolder<TypeUtil>(ret));
 		}
 		return ret;
 	}
@@ -132,7 +133,7 @@ public class TypeUtil {
 		} catch (Exception e) {
 		}
 		returnTypes.put(key, new MissHolder<>(ret));
-		return ret;			
+		return ret;
 	}
 	
 	public boolean isInstantiatable() {
@@ -149,14 +150,14 @@ public class TypeUtil {
 		try {
 			Constructor<?> constructor = concrete.getConstructor();
 			return constructor != null;
-		} catch (NoSuchMethodException e) {			
+		} catch (NoSuchMethodException e) {
 		}
 		try {
 			Constructor<?> constructor = concrete.getDeclaredConstructor();
 			return constructor != null;
-		} catch (NoSuchMethodException e) {			
+		} catch (NoSuchMethodException e) {
 		}
-		return false;		
+		return false;
 	}
 	
 	public <T> T newInstance() {
@@ -205,6 +206,10 @@ public class TypeUtil {
 	
 	public boolean isFloat() {
 		return Float.class == getConcrete() || Float.TYPE == getConcrete();
+	}
+
+	public boolean isBigDecimal() {
+		return BigDecimal.class.isAssignableFrom(getConcrete());
 	}
 
 	public boolean isInteger() {

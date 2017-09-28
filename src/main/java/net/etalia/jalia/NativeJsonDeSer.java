@@ -2,6 +2,7 @@ package net.etalia.jalia;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -140,6 +141,8 @@ public class NativeJsonDeSer implements JsonDeSer {
 								ret = Double.parseDouble((String)ret);
 							} else if (hint.isFloat()) {
 								ret = Float.parseFloat((String)ret);
+							} else if (hint.isBigDecimal()) {
+								ret = new BigDecimal((String)ret);
 							} else if (hint.isBoolean()) {
 								ret = Boolean.parseBoolean((String)ret);
 							}
@@ -188,6 +191,8 @@ public class NativeJsonDeSer implements JsonDeSer {
 				ret = (short)input.nextInt();
 			} else if (hint.isLong()) {
 				ret = input.nextLong();
+			} else if (hint.isBigDecimal()) {
+				ret = new BigDecimal(input.nextString());
 			} else if (Date.class.isAssignableFrom(hint.getConcrete())) {
 				long ms = input.nextLong();
 				ret = new Date(ms);
