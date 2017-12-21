@@ -7,6 +7,6 @@ script: mvn deploy
 after_script: mvn site site:deploy
 
 notifications:
-	email:
-		- d.madama@gmail.com
-		- simoneg@apache.org
+  email:
+    - d.madama@gmail.com
+    - simoneg@apache.org
