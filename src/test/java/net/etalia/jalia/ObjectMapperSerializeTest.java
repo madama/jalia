@@ -613,7 +613,7 @@ public class ObjectMapperSerializeTest {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.init();
 		
-		OutField of = OutField.getRoot("inclAlways","inclNotNull","inclNotEmpty");
+		OutField of = OutField.getRoot("inclAlways","inclNotNull","inclNotEmpty","secretByGetter","secretBySetter","hidden1","hidden2");
 
 		// Defaults to off
 		mapper.setOption(DefaultOptions.INCLUDE_EMPTY, false);
@@ -650,6 +650,20 @@ public class ObjectMapperSerializeTest {
 			assertThat(json, containsString("inclAlways"));
 			assertThat(json, containsString("inclNotNull"));
 			assertThat(json, containsString("inclNotEmpty"));
+		}
+		// all ignore
+		{
+			DummyAnnotations da = new DummyAnnotations();
+			da.setSecretByGetter("test");
+			da.setSecretBySetter("test");
+			da.setHidden1("test");
+			da.setHidden2("test");
+			String json = mapper.writeValueAsString(da, of);
+			System.out.println(json);
+			assertThat(json, not(containsString("secretByGetter")));
+			assertThat(json, not(containsString("secretBySetter")));
+			assertThat(json, not(containsString("hidden1")));
+			assertThat(json, not(containsString("hidden2")));
 		}
 	}
 	

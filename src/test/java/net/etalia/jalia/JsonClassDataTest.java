@@ -81,7 +81,7 @@ public class JsonClassDataTest {
 	
 	@Test
 	public void settings() throws Exception {
-		JsonClassDataFactory factory = new JsonClassDataFactoryImpl();		
+		JsonClassDataFactory factory = new JsonClassDataFactoryImpl();
 		
 		JsonClassData jcd = factory.getClassData(DummyPerson.class, null);
 
@@ -93,7 +93,7 @@ public class JsonClassDataTest {
 
 	@Test
 	public void annotations() throws Exception {
-		JsonClassDataFactory factory = new JsonClassDataFactoryImpl();		
+		JsonClassDataFactory factory = new JsonClassDataFactoryImpl();
 	
 		{
 			JsonClassData jcd = factory.getClassData(DummyAnnotations.class, null);
@@ -111,6 +111,7 @@ public class JsonClassDataTest {
 		{
 			JsonClassData jcd = factory.getClassData(DummyClassAnnotations.class, null);
 			
+			assertThat(jcd.getGettables(), containsInAnyOrder("both","getOnly","getOnlyByGetter","unusual","alternative","objBoolean","natBoolean","inclAlways","inclNotNull","inclNotEmpty"));
 			assertThat(jcd.getOptions("both"), hasEntry(DefaultOptions.INCLUDE_NULLS.toString(), (Object)true));
 			assertThat(jcd.getOptions("both"), hasEntry(DefaultOptions.INCLUDE_EMPTY.toString(), (Object)true));
 		}		
