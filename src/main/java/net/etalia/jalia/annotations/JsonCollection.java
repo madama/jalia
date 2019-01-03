@@ -32,7 +32,15 @@ import java.util.Set;
 @Inherited
 public @interface JsonCollection {
 
+	/**
+	 * If set to true, the existing found collection will not be reused.
+	 */
 	boolean drop() default false;
+
+	/**
+	 * If set to true, the existing found collection will be cleared, so objects matching (by index) will not be reused.
+	 * @return
+	 */
 	boolean clear() default false;
 	
 }
