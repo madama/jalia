@@ -1,13 +1,9 @@
 package net.etalia.jalia;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.io.StringReader;
 import java.util.Map;
 import java.util.Set;
 
@@ -69,7 +65,6 @@ public class OutFieldTest {
 		assertThat(root.getSub("gallery.pippo"), nullValue());		
 		
 		Set<String> stringList = root.toStringList();
-		System.out.println(stringList);
 		for (String sub : subs) {
 			assertThat(stringList, hasItem(sub));
 		}
@@ -77,4 +72,51 @@ public class OutFieldTest {
 		assertThat(stringList, hasSize(subs.length + 3));
 	}
 
+	@Test
+	public void shouldParseGroupsJsonSimple() {
+		String groupJson = "{'group': ['prop1','prop2','link1.prop1','link2.*']}".replace("'","\"");
+		OutField.getGroups().clear();
+		OutField.parseGroupsJson(new StringReader(groupJson));
+
+		assertThat(OutField.getGroups(), hasKey("group"));
+		OutField group = OutField.getGroups().get("group");
+		Set<String> stringList = group.toStringList();
+		assertThat(stringList, containsInAnyOrder("prop1", "prop2", "link1", "link1.prop1", "link2"));
+	}
+
+	@Test
+	public void shouldParseGroupsJsonObject() {
+		String groupJson = (
+				"{'group': " +
+					"{'prop1': true,'prop2':true," +
+					"'link1': {'prop1':true}, " +
+					"'link2': '*', " +
+					"'link3': ['p3','p4']}" +
+				"}").replace("'","\"");
+		OutField.getGroups().clear();
+		OutField.parseGroupsJson(new StringReader(groupJson));
+
+		assertThat(OutField.getGroups(), hasKey("group"));
+		OutField group = OutField.getGroups().get("group");
+		Set<String> stringList = group.toStringList();
+		assertThat(stringList, containsInAnyOrder("prop1", "prop2", "link1", "link1.prop1", "link2", "link3",
+				"link3.p3", "link3.p4"));
+	}
+
+	@Test
+	public void shouldParseGroupsMixedArrays() {
+		String groupJson = (
+				"{'group': [" +
+						"['prop1','prop2']," +
+						"{'link1': ['prop1','prop2']}, " +
+						"'link2.*' " +
+						"]}").replace("'","\"");
+		OutField.getGroups().clear();
+		OutField.parseGroupsJson(new StringReader(groupJson));
+
+		assertThat(OutField.getGroups(), hasKey("group"));
+		OutField group = OutField.getGroups().get("group");
+		Set<String> stringList = group.toStringList();
+		assertThat(stringList, containsInAnyOrder("prop1", "prop2", "link1", "link1.prop1", "link1.prop2", "link2"));
+	}
 }

@@ -1,10 +1,7 @@
 package net.etalia.jalia;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.io.Reader;
+import java.util.*;
 
 /**
  * Holds which fields are required to be serialized.
@@ -28,6 +25,8 @@ import java.util.Set;
  *
  */
 public class OutField {
+
+	private static final Map<String, OutField> groups = new HashMap<>();
 
 	/**
 	 * The parent (in the tree of OutField definitions) fo this definition, or null for the root definition.
@@ -222,7 +221,7 @@ public class OutField {
 	}
 
 	/**
-	 * Get or created multiple children of this OutField based on the given definitions.
+	 * Get or creates multiple children of this OutField based on the given definitions.
 	 *
 	 * @param definitions the definitions to parse
 	 * @return this same instance
@@ -242,6 +241,87 @@ public class OutField {
 	 */
 	public static OutField getRoot(String... fields) {
 		return new OutField(null).getCreateSubs(fields);
+	}
+
+	/**
+	 * Access to groups configuration.
+	 * <p>
+	 * This map can be modified to add new groups programmatically.
+	 *
+	 * @return the map with currently configured groups
+	 */
+	public static Map<String, OutField> getGroups() {
+		return groups;
+	}
+
+	/**
+	 * Parses a JSON containing group configurations and add it to the current groups.
+	 * <p>
+	 *     JSON format is rather flexible, accepting simple arrays:
+	 *     <code>
+	 *         {
+	 *             "groupName": ["field1", "field2", "link.field1", "link.field2", "otherLink.*"]
+	 *         }
+	 *     </code>
+	 *     As well as nexted objects:
+	 *     <code>
+	 *         {
+	 *             "groupName": {
+	 *                 "field1": true,
+	 *                 "field2": true,
+	 *                 "link": {
+	 *                     "field1": true,
+	 *                     "field2": true
+	 *                 },
+	 *                 "otherLink": {
+	 *                     "*" : true
+	 *                 }
+	 *             }
+	 *         }
+	 *     </code>
+	 *     As well as mixed:
+	 *     <code>
+	 *         {
+	 *             "groupName": {
+	 *                 ["field1","field2"],
+	 *                 "link": ["field1","field2"],
+	 *                 "otherLink": "*"
+	 *             }
+	 *         }
+	 *     </code>
+	 * </p>
+	 * @param reader
+	 */
+	public static void parseGroupsJson(Reader reader) {
+		ObjectMapper om = new ObjectMapper();
+		Map<String,Object> payload = om.readValue(reader, new TypeUtil.Specific<Map<String, Object>>() {}.type());
+		for (Map.Entry<String, Object> entry : payload.entrySet()) {
+			List<String> definitions = new ArrayList<>();
+			recurseParseGroupJson(entry.getValue(), "", definitions);
+			String groupName = entry.getKey();
+			OutField fields = groups.get(groupName);
+			if (fields == null) {
+				fields = new OutField(null);
+			}
+			fields.getCreateSubs(definitions.toArray(new String[definitions.size()]));
+			groups.put(groupName, fields);
+		}
+	}
+
+	private static void recurseParseGroupJson(Object value, String prefix, List<String> definitions) {
+		if (value instanceof Boolean) {
+			definitions.add(prefix.substring(0, prefix.length() - 1));
+		} else if (value instanceof String) {
+			definitions.add(prefix + value);
+		} else if (value instanceof Iterable) {
+			for (Object entry : (Iterable)value) {
+				recurseParseGroupJson(entry, prefix, definitions);
+			}
+		} else if (value instanceof Map) {
+			for (Map.Entry<String, Object> entry : ((Map<String,Object>) value).entrySet()) {
+				recurseParseGroupJson(entry.getValue(), prefix + entry.getKey() + ".", definitions);
+			}
+		}
 	}
 
 	/**
