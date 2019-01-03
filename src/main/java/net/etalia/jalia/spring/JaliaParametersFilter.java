@@ -16,6 +16,7 @@ public class JaliaParametersFilter implements Filter {
 	private static final ThreadLocal<OutField> fields = new ThreadLocal<>();
 	
 	private String parameterName;
+	private String groupParameterName;
 
 	public static OutField getFields() {
 		return fields.get();
@@ -27,13 +28,21 @@ public class JaliaParametersFilter implements Filter {
 
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
-		String properties = req.getParameter(parameterName);
-		if (properties != null) {
-			OutField root = new OutField(null);
-			for (String prop : properties.split(",")) {
-				root.getCreateSub(prop);
+		if (parameterName != null) {
+			String properties = req.getParameter(parameterName);
+			if (properties != null) {
+				OutField root = new OutField(null);
+				for (String prop : properties.split(",")) {
+					root.getCreateSub(prop);
+				}
+				fields.set(root);
 			}
-			fields.set(root);
+		} else if (groupParameterName != null) {
+			String groupName = req.getParameter(groupParameterName);
+			if (groupName != null) {
+				OutField root = OutField.getGroups().get(groupName);
+				fields.set(root);
+			}
 		}
 		try {
 			chain.doFilter(req, res);
@@ -45,6 +54,7 @@ public class JaliaParametersFilter implements Filter {
 	@Override
 	public void init(FilterConfig config) {
 		parameterName = config.getInitParameter("parameterName");
+		groupParameterName = config.getInitParameter("groupParameterName");
 	}
 
 	public static void clean() {
