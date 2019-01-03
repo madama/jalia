@@ -17,10 +17,32 @@ import java.util.concurrent.ConcurrentMap;
 
 import net.etalia.utils.MissHolder;
 
+/**
+ * Represents a "type" offering a number of utilities.
+ * <p>
+ * It can be instantiated in two ways. For simple types or types for already defined classes, fields or methods:
+ * <code>
+ *     TypeUtil.get(_java_type_);
+ * </code>
+ * Instead for inline types, {@link Specific} can be used as follows:
+ * <code>
+ *     new TypeUtil.specific&lt;List&lt;String&gt;&gt;() {}.type();
+ * </code>
+ * Note the "{}" above, cause we are actually creating an anonymous class from where to extract the type.
+ */
 public class TypeUtil {
 
-	private static ConcurrentMap<Type, TypeUtil> cache = new ConcurrentHashMap<Type, TypeUtil>();
-	
+	/**
+	 * Cache of already known type.
+	 */
+	private static final ConcurrentMap<Type, TypeUtil> cache = new ConcurrentHashMap<Type, TypeUtil>();
+
+	/**
+	 * Get the TypeUtil for a {@link Type}, which can be a {@link Class} or a any other Type subinterface,
+	 *
+	 * @param type the type to analyze
+	 * @return the corresponding TypeUtil instance
+	 */
 	public static TypeUtil get(Type type) {
 		if (type == null) return null;
 		TypeUtil ret = cache.get(type);
@@ -32,24 +54,55 @@ public class TypeUtil {
 			ret = pre;
 		return ret;
 	}
-	
-	private Type type;
+
+	/**
+	 * The type this instance if handling.
+	 */
+	private final Type type;
 	
 	// Caches
+	/**
+	 * Cached concrete Class, if applicable.
+	 */
 	private Class<?> concrete;
-	private Map<String,MissHolder<TypeUtil>> returnTypes = new HashMap<>();
+
+	/**
+	 * Cached method return types.
+	 */
+	private final Map<String,MissHolder<TypeUtil>> returnTypes = new HashMap<>();
+
+	/**
+	 * Cached enum values, if this TypeUtil represents an Enum.
+	 */
 	private Enum<?>[] enums;
+
+	/**
+	 * Cached value, true if the type this instance is handling has a concrete type.
+	 */
 	private Boolean hasConcreteCache;
+
+	/**
+	 * Cached value, true if the type this instance if handling is instantiatable.
+	 */
 	private Boolean isInstantiatableCache; 
 	
-	public TypeUtil(Type type) {
+	private TypeUtil(Type type) {
 		this.type = type;
 	}
-	
+
+	/**
+	 * @return the underlying Type handled by this instance
+	 */
 	public Type getType() {
 		return type;
 	}
-	
+
+	/**
+	 * Tries to extrapolate the concrete (plain Class) type.
+	 *
+	 * @return the concrete type
+	 * @throws IllegalArgumentException if concrete type cannot be extrapolated
+	 */
 	public Class<?> getConcrete() {
 		if (concrete != null) return concrete;
 		if (type instanceof Class) {
@@ -61,7 +114,10 @@ public class TypeUtil {
 		} else throw new IllegalArgumentException("Can't parse type " + type);		
 		return concrete;
 	}
-	
+
+	/**
+	 * @return true if there is a concrete (plain Class) extrapolable
+	 */
 	public boolean hasConcrete() {
 		if (hasConcreteCache != null) return hasConcreteCache;
 		try {
@@ -72,7 +128,12 @@ public class TypeUtil {
 		}
 		return hasConcreteCache;
 	}
-	
+
+	/**
+	 * Internal implementation that tried to resolve a TypeVariable in the context of this type.
+	 * @param type the type variable to resolve
+	 * @return the Type of the TypeVariable or null if it cannot be determined
+	 */
 	private Type resolveType(Type type) {
 		if (!(type instanceof TypeVariable)) return type;
 		TypeUtil ptype = this;
@@ -93,7 +154,14 @@ public class TypeUtil {
 		if (ind == -1) return null;
 		return ((ParameterizedType)ptype.type).getActualTypeArguments()[ind];
 	}
-	
+
+	/**
+	 * Tries to resolve the return type of a method.
+	 *
+	 * @param methodName name of the method
+	 * @param params parameters of the method (to distinguish overrides)
+	 * @return the TypeUtil, or null if type cannot be resolved
+	 */
 	public TypeUtil findReturnTypeOf(String methodName, Class<?>... params) {
 		String key = "r-" + methodName + (params == null ? "0" : Arrays.toString(params));
 		MissHolder<TypeUtil> found = returnTypes.get(key);
@@ -115,7 +183,13 @@ public class TypeUtil {
 		}
 		return ret;
 	}
-	
+
+	/**
+	 * Tries to resolve the type of a parameter or a method
+	 * @param methodName method name
+	 * @param paramIndex index (0 based) of the parameter
+	 * @return the TypeUtil, or null if type cannot be resolved
+	 */
 	public TypeUtil findParameterOf(String methodName, int paramIndex) {
 		String key = "p-" + paramIndex + methodName;
 		MissHolder<TypeUtil> found = returnTypes.get(key);
@@ -130,18 +204,25 @@ public class TypeUtil {
 				ret = get(resolveType(params[paramIndex]));
 				break;
 			}
-		} catch (Exception e) {
+		} catch (Exception ignored) {
 		}
 		returnTypes.put(key, new MissHolder<>(ret));
 		return ret;
 	}
-	
+
+	/**
+	 * @return true if this type can ne instantiated (that is, it's a class and has a default constructor with not
+	 * parameters)
+	 */
 	public boolean isInstantiatable() {
 		if (isInstantiatableCache == null) 
 			isInstantiatableCache = isInstantiableInternal();
 		return isInstantiatableCache;
 	}
-	
+
+	/**
+	 * Internal implementation to determine if this type is instantiable.
+	 */
 	private boolean isInstantiableInternal() {
 		if (!hasConcrete()) return false;
 		Class<?> concrete = getConcrete();
@@ -150,27 +231,34 @@ public class TypeUtil {
 		try {
 			Constructor<?> constructor = concrete.getConstructor();
 			return constructor != null;
-		} catch (NoSuchMethodException e) {
+		} catch (NoSuchMethodException ignored) {
 		}
 		try {
 			Constructor<?> constructor = concrete.getDeclaredConstructor();
 			return constructor != null;
-		} catch (NoSuchMethodException e) {
+		} catch (NoSuchMethodException ignored) {
 		}
 		return false;
 	}
-	
+
+	/**
+	 * Creates a new instance for this type.
+	 *
+	 * @param <T> the actual type
+	 * @return an instance
+	 * @throws IllegalStateException if an instance cannot be created for whatever reason
+	 */
 	public <T> T newInstance() {
 		T ret = null;
 		Class<T> clazz = (Class<T>) getConcrete();
 		try {
-			ret =clazz.newInstance();
+			ret = clazz.newInstance();
 		} catch (Exception e) {
 			try {
 				Constructor<T> con = clazz.getDeclaredConstructor();
 				con.setAccessible(true);
 				ret = con.newInstance();
-			} catch (NoSuchMethodException nsm) {
+			} catch (NoSuchMethodException ignored) {
 			} catch (Exception e2) {
 				e = e2;
 			}
@@ -180,14 +268,27 @@ public class TypeUtil {
 		return ret;
 	}
 
+	/**
+	 * @return true if a value of this type can be set to null, it must be concrete and not primitive
+	 */
 	public boolean isNullable() {
 		return !getConcrete().isPrimitive();
 	}
-	
+
+	/**
+	 * @return true if this type is an enum
+	 */
 	public boolean isEnum() {
 		return Enum.class.isAssignableFrom(getConcrete());
 	}
 
+	/**
+	 * Gets an enum value by name.
+	 *
+	 * @param val the name of the value to get
+	 * @return the value
+	 * @throws IllegalStateException in case the value cannot be found
+	 */
 	public Enum<?> getEnumValue(String val) {
 		if (enums == null) enums=(Enum<?>[]) getConcrete().getEnumConstants();
 		for (Enum<?> v : enums) {
@@ -196,45 +297,74 @@ public class TypeUtil {
 		throw new IllegalStateException("Cannot find enum value : " + getConcrete().getName() + "." + val);
 	}
 
+	/**
+	 * @return true if this type is a char sequence (String, StringBuilder, StringBuffer etc..)
+	 */
 	public boolean isCharSequence() {
 		return CharSequence.class.isAssignableFrom(getConcrete());
 	}
 
+	/**
+	 * @return true if this type is a double (primitive double or Double)
+	 */
 	public boolean isDouble() {
 		return Double.class == getConcrete() || Double.TYPE == getConcrete();
 	}
-	
+
+	/**
+	 * @return true if this type is a float (primitive float or Float)
+	 */
 	public boolean isFloat() {
 		return Float.class == getConcrete() || Float.TYPE == getConcrete();
 	}
 
+	/**
+	 * @return true if this type is a {@link BigDecimal}
+	 */
 	public boolean isBigDecimal() {
 		return BigDecimal.class.isAssignableFrom(getConcrete());
 	}
 
+	/**
+	 * @return true if this type is a integer (primitive int or Integer)
+	 */
 	public boolean isInteger() {
 		return Integer.class == getConcrete() || Integer.TYPE == getConcrete();
 	}
 
+	/**
+	 * @return true if this type is a short (primitive short or Short)
+	 */
 	public boolean isShort() {
 		return Short.class == getConcrete() || Short.TYPE == getConcrete();
 	}
-	
+
+	/**
+	 * @return true if this type is a long (primitive long or Long)
+	 */
 	public boolean isLong() {
 		return Long.class == getConcrete() || Long.TYPE == getConcrete();
 	}
-	
+
+	/**
+	 * @return true if this type is a number (any type of number)
+	 */
 	public boolean isNumber() {
 		return Number.class.isAssignableFrom(getConcrete());
 	}
-	
+
+	/**
+	 * @return true if this type is a boolean (primitive boolean or Boolean)
+	 */
 	public boolean isBoolean() {
 		return Boolean.class == getConcrete() || Boolean.TYPE == getConcrete();
 	}
-	
 
+	/**
+	 * @return true if this type is an array
+	 */
 	public boolean isArray() {
-		Class<?> conc = null;
+		Class<?> conc;
 		try {
 			conc = getConcrete();
 		} catch (Exception e) {
@@ -242,15 +372,26 @@ public class TypeUtil {
 		}
 		return conc.isArray();
 	}
-	
+
+	/**
+	 * @return the constituent type of the array, for example for "Person[]" it will return the TypeUtil handling
+	 * "Person"
+	 */
 	public TypeUtil getArrayType() {
 		return get(getConcrete().getComponentType());
 	}
-	
+
+	/**
+	 * @return true if this type is a {@link List} or {@link Set}
+	 */
 	public boolean isListOrSet() {
 		return (List.class.isAssignableFrom(this.getConcrete()) || Set.class.isAssignableFrom(this.getConcrete()));
 	}
-	
+
+	/**
+	 * @return the constituent type of the {@link List} or {@link Set}, for example for "List&lt;String&gt;" it will
+	 * return the TypeUtil handling "String"
+	 */
 	public TypeUtil getListOrSetType() {
 		TypeUtil inner = null;
 		if (List.class.isAssignableFrom(this.getConcrete())) {
@@ -260,14 +401,25 @@ public class TypeUtil {
 		}
 		return inner;
 	}
-	
+
+	/**
+	 * @return get the constituent type of this array or {@link List} or {@link Set}
+	 */
 	public TypeUtil getArrayListOrSetType() {
 		if (this.isArray()) return this.getArrayType();
 		if (this.isListOrSet()) return this.getListOrSetType();
 		return null;
 	}
-	
-	
+
+	/**
+	 * Inner class used to define inline types.
+	 * <p>
+	 * For example:
+	 * <code>
+	 *     new TypeUtil.Specific&lt;List&lt;String&gt;&gt;() {}.type();
+	 * </code>
+	 * @param <T> the actual inline type
+	 */
 	public static abstract class Specific<T> {
 		public T mockGet() {
 			return null;

@@ -1,7 +1,9 @@
 [![Build Status](https://travis-ci.org/madama/jalia.svg?branch=master)](https://travis-ci.org/madama/jalia)
 
 
-jalia
+Jalia
 =====
 
-JSON Serializer/Deserializer and databinding with Hibernate support
+JSON Serializer/Deserializer with Java Beans compliant behaviour and permissions.
+
+

@@ -13,7 +13,7 @@ import net.etalia.jalia.OutField;
 
 public class JaliaParametersFilter implements Filter {
 	
-	private static ThreadLocal<OutField> fields = new ThreadLocal<>();
+	private static final ThreadLocal<OutField> fields = new ThreadLocal<>();
 	
 	private String parameterName;
 
@@ -43,7 +43,7 @@ public class JaliaParametersFilter implements Filter {
 	}
 
 	@Override
-	public void init(FilterConfig config) throws ServletException {
+	public void init(FilterConfig config) {
 		parameterName = config.getInitParameter("parameterName");
 	}
 

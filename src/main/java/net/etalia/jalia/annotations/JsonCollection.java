@@ -32,7 +32,7 @@ import java.util.Set;
 @Inherited
 public @interface JsonCollection {
 
-	public boolean drop() default false;
-	public boolean clear() default false;
+	boolean drop() default false;
+	boolean clear() default false;
 	
 }

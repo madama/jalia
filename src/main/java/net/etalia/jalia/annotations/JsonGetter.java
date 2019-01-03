@@ -5,6 +5,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Explicitly defines a method as a getter to use for Json serialization (and also for deserialization of
+ * collections and other entities, where the getter is called to fetch the existing value).
+ */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JsonGetter {

@@ -375,7 +375,7 @@ public class JsonWriter implements Closeable, Flushable {
    * @param name the name of the forthcoming value. May not be null.
    * @return this writer.
    */
-  public JsonWriter name(String name) throws IOException {
+  public JsonWriter name(String name) {
     if (name == null) {
       throw new NullPointerException("name == null");
     }
@@ -389,7 +389,7 @@ public class JsonWriter implements Closeable, Flushable {
     return this;
   }
   
-  public JsonWriter clearName() throws IOException {
+  public JsonWriter clearName() {
 	  deferredName = null;
 	  return this;
   }
@@ -593,7 +593,6 @@ public class JsonWriter implements Closeable, Flushable {
    * @param root true if the value is a new array or object, the two values
    *     permitted as top-level elements.
    */
-  @SuppressWarnings("fallthrough")
   private void beforeValue(boolean root) throws IOException {
     switch (peek()) {
     case NONEMPTY_DOCUMENT:

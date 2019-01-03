@@ -34,16 +34,40 @@ public class JsonClassData {
 	}
 	
 	protected Class<?> clazz;
-	
+
+	/**
+	 * Name of the fields that must be serialized by default, if no specific fields are requested.
+	 */
 	protected Set<String> defaults = new HashSet<>();
-	
+
+	/**
+	 * Visible, not ignored, getters on this class.
+	 */
 	protected Map<String,Method> getters = new HashMap<>();
+
+	/**
+	 * Visible, not ignored, getters on this class, that must be serialized only if requested.
+	 */
 	protected Map<String,Method> ondemand = new HashMap<>();
+
+	/**
+	 * Visible, not ignored, setters on this class.
+	 */
 	protected Map<String,Method> setters = new HashMap<>();
-	
+
+	/**
+	 * All getters on this class, including ignored ones.
+	 */
 	protected Map<String,Method> allGetters = new HashMap<>();
+
+	/**
+	 * All setters on this class, including ignored ones.
+	 */
 	protected Map<String,Method> allSetters = new HashMap<>();
-	
+
+	/**
+	 * Options for each property, these are built parsing some annotations like for example {@link JsonCollection}.
+	 */
 	protected Map<String,Map<String,Object>> options = new HashMap<String, Map<String,Object>>();
 	
 	// Caches
@@ -67,14 +91,25 @@ public class JsonClassData {
 		this.clazz = clazz;
 		parse(clazz);
 	}
-	
+
+	/**
+	 * @return true if this JsonClassData is new, that is, the unsetNew method has not yet been called.
+	 */
 	public boolean isNew() {
 		return isNew;
 	}
+
+	/**
+	 * Set this JsonClassData as not new anymore.
+	 */
 	public void unsetNew() {
 		this.isNew = false;
 	}
-	
+
+	/**
+	 * Parse a class, anlyze annotation and method found in the class, and configure this JsonClassData accordingly.
+	 * @param c The class to parse.
+	 */
 	private void parse(Class<?> c) {
 		
 		Set<String> ignore = new HashSet<String>();
@@ -124,7 +159,7 @@ public class JsonClassData {
 		Class<?>[] interfaces = c.getInterfaces();
 		for (Class<?> inter : interfaces) parse(inter);
 		
-		// Add class configuration to all getters 
+		// Parse class annotations to fetch options and pass those to all getters
 		Map<String, Object> globs = new HashMap<String, Object>();
 		parseOptions(clazz, globs);
 		if (globs.size() > 0) {
@@ -141,6 +176,22 @@ public class JsonClassData {
 		}
 	}
 
+	/**
+	 * Extract the property name from the method name.
+	 *
+	 * This method strips initial "get", "set" or "is", decapitalizes the name, or uses the name
+	 * from {@link JsonGetter} or {@link JsonSetter} annotations.
+	 *
+	 * It also checks for ignored methods annotated with {@link JsonIgnore} and add the property name
+	 * to the given "ignore" set.
+	 *
+	 * If the property has to be ignored, the name is returned prefixed with an exclamation mark.
+	 *
+	 * @param method The method to extract the name from.
+	 * @param ignore The set of property names to ignore, new found properties with @JsonIgnore will be added to this
+	 *                  set.
+	 * @return The extracted normalized property name, prefixed with an exclamation mark if it has to be ignored.
+	 */
 	private String methodName(Method method, Set<String> ignore) {
 		String name = null;
 		boolean explicitSet = false;
@@ -184,12 +235,17 @@ public class JsonClassData {
                         Character.isUpperCase(name.charAt(0))){
             return name;
         }
-        char chars[] = name.toCharArray();
+		char[] chars = name.toCharArray();
         chars[0] = Character.toLowerCase(chars[0]);
         return new String(chars);
     }
-	
-	
+
+	/**
+	 * Parse a getter and add it to this class.
+	 *
+	 * @param method The method to parse.
+	 * @param ignore The known set of property names to ignore.
+	 */
 	private void parseGetter(Method method, Set<String> ignore) {
 		// Skip getClass
 		if (method.getName().equals("getClass")) return;
@@ -233,7 +289,14 @@ public class JsonClassData {
 			this.getters.put(name, method);
 		}
 	}
-	
+
+	/**
+	 * Parse annotations and build a map of {@link Option} and values based on
+	 * this annotations.
+	 *
+	 * @param ele The element (method or class) to analyze for annotations.
+	 * @param opts The options found.
+	 */
 	private void parseOptions(AnnotatedElement ele, Map<String, Object> opts) {
 		JsonInclude includeAnn = ele.getAnnotation(JsonInclude.class);
 		if (includeAnn != null) {
@@ -261,6 +324,11 @@ public class JsonClassData {
 		}
 	}
 
+	/**
+	 * Parse a setter and add it to this class data.
+	 * @param method The setter method to parse.
+	 * @param ignore The set of property names to ignore.
+	 */
 	private void parseSetter(Method method, Set<String> ignore) {
 		if (method.getParameterTypes().length != 1) return;
 		if (Modifier.isStatic(method.getModifiers())) return;
@@ -283,10 +351,24 @@ public class JsonClassData {
 		this.setters.put(name, method);
 	}
 
+	/**
+	 * Get the value of a property from and entity.
+	 * @param name The name of the property to read.
+	 * @param obj The entity to read from.
+	 * @return The value or null if the property is ignored or an error occurs.
+	 */
 	public Object getValue(String name, Object obj) {
 		return getValue(name, obj, false);
 	}
-	
+
+	/**
+	 * Get the value of a property from and entity.
+	 * @param name The name of the property to read.
+	 * @param obj The entity to read from.
+	 * @param force If true, it will force getting the value even if the property is ognired.
+	 * @return The value or null if the property is ignored and force is false, or if the property is not found or
+	 * an error occurs.
+	 */
 	public Object getValue(String name, Object obj, boolean force) {
 		Method method = this.getters.get(name);
 		if (method == null) method = this.ondemand.get(name);
@@ -301,36 +383,64 @@ public class JsonClassData {
 		}
 	}
 
+	/**
+	 * @return a set of all visible property names that can be read.
+	 */
 	public Set<String> getGettables() {
 		return this.getters.keySet();
 	}
-	
+
+	/**
+	 * @return a sorted list of all visible property names that can be read.
+	 */
 	public List<String> getSortedGettables() {
 		ArrayList<String> ret = new ArrayList<String>(this.getters.keySet());
 		Collections.sort(ret);
 		return ret;
 	}
 
+	/**
+	 * @return a set of all visible property names that can be written.
+	 */
 	public Set<String> getSettables() {
 		return this.setters.keySet();
 	}
-	
+
+	/**
+	 * @return a set of default properties to serialize, or only the value "*" if no defaults were specified.
+	 */
 	public Set<String> getDefaults() {
 		return this.defaults.size() > 0 ? this.defaults : ALL_SET;
 	}
 
+	/**
+	 * @return the Class being handled by this JsonClassData.
+	 */
 	public Class<?> getTargetClass() {
 		return this.clazz;
 	}
 
+	/**
+	 * Programmatically ignore a setter by property name.
+	 * @param string the name of the property whose setter must be ignored.
+	 */
 	public void ignoreSetter(String string) {
 		this.setters.remove(string);
 	}
-	
+
+	/**
+	 * Programmatically ignore a getter by property name.
+	 * @param string the name of the property whose getter must be ignored.
+	 */
 	public void ignoreGetter(String string) {
 		this.getters.remove(string);
 	}
 
+	/**
+	 * Get the type hint for the setter of a property.
+	 * @param name The name of the property.
+	 * @return the type hint.
+	 */
 	public TypeUtil getSetHint(String name) {
 		MissHolder<TypeUtil> found = setHints.get(name);
 		if (found != null) return found.getVal();
@@ -342,6 +452,11 @@ public class JsonClassData {
 		return ret;
 	}
 
+	/**
+	 * Get the type hint for the getter of a property.
+	 * @param name The name of the property.
+	 * @return the type hint.
+	 */
 	public TypeUtil getGetHint(String name) {
 		MissHolder<TypeUtil> found = getHints.get(name);
 		if (found != null) return found.getVal();
@@ -353,10 +468,25 @@ public class JsonClassData {
 		return ret;
 	}
 
+	/**
+	 * Set a value on an entity.
+	 * @param name The name of the property to set.
+	 * @param nval The value to set.
+	 * @param tgt The target entity.
+	 * @return true if setting the value was successful, false otherwise.
+	 */
 	public boolean setValue(String name, Object nval, Object tgt) {
 		return setValue(name, nval, tgt, false);
-	}	
-	
+	}
+
+	/**
+	 * Set a value on an entity, optionally forcing on ignored setters.
+	 * @param name The name of the property to set.
+	 * @param nval The value to set.
+	 * @param tgt The target entity.
+	 * @param force if true will force setting also on ignored properties.
+	 * @return true if setting the value was successful, false otherwise.
+	 */
 	public boolean setValue(String name, Object nval, Object tgt, boolean force) {
 		Method method = this.setters.get(name);
 		if (method == null && force) method = this.allSetters.get(name);
@@ -368,9 +498,14 @@ public class JsonClassData {
 			// TODO log this?
 			return false;
 		}
-		return false;
+		return true;
 	}
 
+	/**
+	 * Get options for a property.
+	 * @param name The property name.
+	 * @return de-serialization options for the property, if any.
+	 */
 	public Map<String,Object> getOptions(String name) {
 		return this.options.get(name);
 	}

@@ -11,6 +11,10 @@ import net.etalia.jalia.stream.JsonReader;
 import net.etalia.jalia.stream.JsonToken;
 import net.etalia.jalia.stream.JsonWriter;
 
+/**
+ * De-serializer for {@link Map}, and second choice for every object-like found on JSON when deserializing (the primary
+ * being {@link BeanJsonDeSer} when an "@class" is present.
+ */
 public class MapJsonDeSer implements JsonDeSer {
 
 	@Override
@@ -24,7 +28,7 @@ public class MapJsonDeSer implements JsonDeSer {
 			if (hint.hasConcrete() && Map.class.isAssignableFrom(hint.getConcrete())) return 10;
 		try {
 			if (context.getInput().peek() == JsonToken.BEGIN_OBJECT) return 5;
-		} catch (IOException e) {}
+		} catch (IOException ignored) {}
 		return 0;
 	}
 
@@ -37,12 +41,12 @@ public class MapJsonDeSer implements JsonDeSer {
 			return;
 		}
 		
-		if (context.hasInLocalStack("All_SerializeStack", obj)) {
+		if (context.hasInLocalStack(CTX_ALL_SERIALIZESTACK, obj)) {
 			// TODO this avoid loops, but also break serialization, cause there is no id to send
-			output.clearName();			
+			output.clearName();
 			return;
-		}		
-		context.putLocalStack("All_SerializeStack", obj);
+		}
+		context.putLocalStack(CTX_ALL_SERIALIZESTACK, obj);
 		
 		output.beginObject();
 		for (Map.Entry<String,?> entry : map.entrySet()) {
@@ -56,6 +60,22 @@ public class MapJsonDeSer implements JsonDeSer {
 		output.endObject();
 	}
 
+	/**
+	 * During deserialization the following happens:
+	 * <ul>
+	 *     <li>The existing Map is reused if possible, otherwise a new {@link HashMap} is created.
+	 *     <li>Existing objects found with the same key are reused.
+	 *     <li>Primitive numbers are reduced from double to long if they are integers, and/or from long to integer
+	 *     if they are within integer limits.
+	 *     <li>Keys not found in the JSON are removed from the map.
+	 * </ul>
+	 * @param context The current deserialization context.
+	 * @param pre The existing value to modify if any, null otherwise.
+	 * @param hint A hint ont he expected return type.
+	 * @return the deserialized object
+	 * @throws IOException if read operation from underlying JsonReader fails
+	 */
+	// TODO add a JsonMap annotation, similar to JsonCollection, to preserve existing keys and to clear the map
 	@Override
 	public Object deserialize(JsonContext context, Object pre, TypeUtil hint) throws IOException {
 		Map<String,Object> act = (Map<String, Object>) pre;
@@ -106,12 +126,12 @@ public class MapJsonDeSer implements JsonDeSer {
 		if (val instanceof Double) {
 			Double d = (Double)val;
 			Long l = d.longValue();
-			if (l.doubleValue() == d.doubleValue()) return reduceNumber(l);
+			if (l.doubleValue() == d) return reduceNumber(l);
 			return val;
 		}
 		if (val instanceof Long) {
 			Long l = (Long)val;
-			if (l.longValue() > Integer.MAX_VALUE || l < Integer.MIN_VALUE) return val;
+			if (l > Integer.MAX_VALUE || l < Integer.MIN_VALUE) return val;
 			return reduceNumber(l.intValue());
 		}
 		return val;

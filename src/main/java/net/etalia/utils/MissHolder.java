@@ -2,7 +2,7 @@ package net.etalia.utils;
 
 public class MissHolder<T> {
 
-	private T val;
+	private final T val;
 	
 	public MissHolder(T val) {
 		this.val = val;

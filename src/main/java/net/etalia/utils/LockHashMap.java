@@ -7,9 +7,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class LockHashMap<K, V> extends HashMap<K, V> {
 
-	private ReadWriteLock rwlock = new ReentrantReadWriteLock();
-	private Lock rlock = rwlock.readLock();
-	private Lock wlock = rwlock.writeLock();
+	private final ReadWriteLock rwlock = new ReentrantReadWriteLock();
+	private final Lock rlock = rwlock.readLock();
+	private final Lock wlock = rwlock.writeLock();
 	
 	public void lockRead() {
 		rlock.lock();

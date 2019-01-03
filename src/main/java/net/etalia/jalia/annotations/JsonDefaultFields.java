@@ -6,13 +6,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Specifies which fields must be serialized by default when no fields are requested by the calling client.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Inherited
 public @interface JsonDefaultFields {
 	
-	public static String UNASSIGNED = "[unassigned]";
+	String UNASSIGNED = "[unassigned]";
 
-	public String value() default UNASSIGNED;
+	String value() default UNASSIGNED;
 
 }
