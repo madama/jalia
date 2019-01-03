@@ -9,10 +9,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import net.etalia.jalia.annotations.JsonCollection;
 import net.etalia.jalia.stream.JsonReader;
 import net.etalia.jalia.stream.JsonToken;
 import net.etalia.jalia.stream.JsonWriter;
 
+/**
+ * De-serializer for ant {@link Iterable} and native arrays.
+ */
 public class ListJsonDeSer implements JsonDeSer {
 
 	public static final String DROP = "LIST_JSON_DESER_DROP";
@@ -31,11 +35,11 @@ public class ListJsonDeSer implements JsonDeSer {
 			if (hint.isArray()) return 10;
 			try {
 				if (Iterable.class.isAssignableFrom(hint.getConcrete())) return 10;
-			} catch (Exception e) {}
+			} catch (Exception ignored) {}
 		}
 		try {
 			if (context.getInput().peek() == JsonToken.BEGIN_ARRAY) return 10;
-		} catch (Exception e) {}
+		} catch (Exception ignored) {}
 		return -1;
 	}
 
@@ -43,12 +47,12 @@ public class ListJsonDeSer implements JsonDeSer {
 	public void serialize(Object obj, JsonContext context) throws IOException {
 		JsonWriter output = context.getOutput();
 		
-		if (context.hasInLocalStack("All_SerializeStack", obj)) {
+		if (context.hasInLocalStack(CTX_ALL_SERIALIZESTACK, obj)) {
 			// TODO this avoid loops, but also break serialization, cause there is no id to send
 			output.clearName();
 			return;
 		}		
-		context.putLocalStack("All_SerializeStack", obj);
+		context.putLocalStack(CTX_ALL_SERIALIZESTACK, obj);
 		
 		if (obj.getClass().isArray()) {
 			if (Array.getLength(obj) == 0 && !context.isRoot() && !context.getFromStackBoolean(DefaultOptions.INCLUDE_EMPTY.toString())) {
@@ -72,9 +76,30 @@ public class ListJsonDeSer implements JsonDeSer {
 		output.endArray();
 	}
 
+	/**
+	 * Deserializes a List, Set or array.
+	 * <p>
+	 * During deserialization, the following applies:
+	 * <ul>
+	 *     <li>The existing collection will be reused, unless {@link JsonCollection#drop()} is set.
+	 *     <li>Existing values inside the collection, if any, will be reused and updated with found JSON, as long as
+	 *     there is a pre-existing collection to reuse, and at given index there is an object to reuse.
+	 *     <li>If {@link JsonCollection#clear()} is specified, the collection is cleared, so no existing object will
+	 *     be available for reuse.
+	 *     <li>Elements not existing in the JSON (matched by index in the array) will be removed by the existing
+	 *     collection.
+	 *     <li>If the existing type is an array, and the input JSON array size is different, the existing array will not
+	 *     be reused cause arrays in Java cannot be resized.
+	 * </ul>
+	 * @param context the current deserialization context
+	 * @param pre the existing value to modify if any, null otherwise
+	 * @param hint a hint ont he expected return type
+	 * @return the deserialized collection
+	 * @throws IOException if something goes wrong reading from the input JSON
+	 */
 	@Override
 	public Object deserialize(JsonContext context, Object pre, TypeUtil hint) throws IOException {
-		Collection<Object> act = null;
+		Collection<Object> act;
 		boolean wasArray = (pre != null && pre.getClass().isArray()); 
 		if (pre != null && pre.getClass().isArray()) {
 			act = new ArrayList<Object>();
@@ -125,7 +150,7 @@ public class ListJsonDeSer implements JsonDeSer {
 		input.beginArray();
 		{
 			int i = 0;
-			List<Object> lst = null;
+			List<Object> lst;
 			if (act instanceof List) {
 				lst = (List<Object>)act;
 			} else {
@@ -135,9 +160,7 @@ public class ListJsonDeSer implements JsonDeSer {
 			List<Object> found = new ArrayList<>();
 			while (input.hasNext()) {
 				Object preval = null;
-				if (lst != null) {
-					if (i < lst.size()) preval = lst.get(i);
-				}
+				if (i < lst.size()) preval = lst.get(i);
 				Object val = context.getMapper().readValue(context, preval, inner);
 				found.add(val);
 				try {

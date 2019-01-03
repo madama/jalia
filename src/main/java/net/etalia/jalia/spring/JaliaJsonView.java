@@ -1,23 +1,16 @@
 package net.etalia.jalia.spring;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import net.etalia.jalia.ObjectMapper;
+import net.etalia.jalia.OutField;
+import org.springframework.web.servlet.view.AbstractView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import net.etalia.jalia.ObjectMapper;
-import net.etalia.jalia.OutField;
-
-import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.servlet.view.AbstractView;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 public class JaliaJsonView extends AbstractView {
 	/**
@@ -95,13 +88,16 @@ public class JaliaJsonView extends AbstractView {
 		OutputStream stream = (this.updateContentLength ? createTemporaryOutputStream() : response.getOutputStream());
 		writeContent(stream, model, this.jsonPrefix);
 		if (this.updateContentLength) {
+			// Will not give class cast exception cause the same condition is checked above and
+			// createTemporaryOutputStream is used to obtain a ByteArrayOutputStream
+			//noinspection ConstantConditions
 			writeToResponse(response, (ByteArrayOutputStream) stream);
 		}
 	}
 
 	protected void writeContent(OutputStream stream, Object value, String jsonPrefix) throws IOException {
 		if (jsonPrefix != null) {
-			stream.write(jsonPrefix.getBytes("UTF-8"));
+			stream.write(jsonPrefix.getBytes(StandardCharsets.UTF_8));
 		}
 		this.objectMapper.writeValue(stream, this.outfields, value);
 	}

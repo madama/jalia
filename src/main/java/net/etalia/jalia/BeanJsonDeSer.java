@@ -13,6 +13,8 @@ import net.etalia.jalia.stream.JsonWriter;
 public class BeanJsonDeSer implements JsonDeSer {
 
 	public static final String REUSE_WITHOUT_ID = "BEAN_JSON_DESER_REUSEWITHOUTID";
+	private static final String CTX_BEAN_JSON_DE_SER_DONES = "BeanJsonDeSer_Dones";
+	private static final String CTX_BEAN_JSON_DE_SER_SENTS = "BeanJsonDeSer_Sents";
 
 	@Override
 	public int handlesSerialization(JsonContext context, Class<?> clazz) {
@@ -67,18 +69,18 @@ public class BeanJsonDeSer implements JsonDeSer {
 			String id = factory.getId(obj, context);
 			if (id != null) {
 				// Prevent loops in serialization
-				if (context.hasInLocalStack("All_SerializeStack", obj)) {
+				if (context.hasInLocalStack(CTX_ALL_SERIALIZESTACK, obj)) {
 					if (!context.getFromStackBoolean(DefaultOptions.UNROLL_OBJECTS.toString()) || context.isSerializingAll()) {
 						output.value(id);
 						return;
 					}
 				}
 				
-				// Prevent sending and object twice, send on ly the id, unless DefaultOptions.UNROLL_OBJECT
-				Map<String,Object> sents = (Map<String, Object>) context.get("BeanJsonDeSer_Sents");
+				// Prevent sending and object twice, send only the id, unless DefaultOptions.UNROLL_OBJECT
+				Map<String,Object> sents = (Map<String, Object>) context.get(CTX_BEAN_JSON_DE_SER_SENTS);
 				if (sents == null) {
 					sents = new HashMap<>();
-					context.put("BeanJsonDeSer_Sents", sents);
+					context.put(CTX_BEAN_JSON_DE_SER_SENTS, sents);
 				}
 				if (sents.containsKey(id) && !context.getFromStackBoolean(DefaultOptions.UNROLL_OBJECTS.toString())) {
 					output.value(id);
@@ -88,7 +90,7 @@ public class BeanJsonDeSer implements JsonDeSer {
 			}
 		}
 
-		if (context.hasInLocalStack("All_SerializeStack", obj)) {
+		if (context.hasInLocalStack(CTX_ALL_SERIALIZESTACK, obj)) {
 			if (!context.getFromStackBoolean(DefaultOptions.UNROLL_OBJECTS.toString()) || context.isSerializingAll()) {
 				// TODO this avoid loops, but also break serialization, cause there is no id to send
 				output.clearName();			
@@ -96,7 +98,7 @@ public class BeanJsonDeSer implements JsonDeSer {
 			}
 		}		
 		
-		context.putLocalStack("All_SerializeStack", obj);
+		context.putLocalStack(CTX_ALL_SERIALIZESTACK, obj);
 		
 		output.beginObject();
 		boolean sentEntity = false;
@@ -137,7 +139,7 @@ public class BeanJsonDeSer implements JsonDeSer {
 		for (String name : context.getCurrentSubs()) {
 			if (sents.contains(name)) continue;
 			if (context.entering(name, cd.getDefaults())) {
-				Object val = null;
+				Object val;
 				val = cd.getValue(name, obj);
 				if (val == null && !context.getFromStackBoolean(DefaultOptions.INCLUDE_NULLS.toString())) {
 					context.exited();
@@ -156,7 +158,7 @@ public class BeanJsonDeSer implements JsonDeSer {
 		output.endObject();
 		
 		if (factory != null) {
-			obj = factory.finish(obj, true, context);
+			factory.finish(obj, true, context);
 		}
 	}
 
@@ -174,7 +176,7 @@ public class BeanJsonDeSer implements JsonDeSer {
 			id = input.nextString();
 			embedded = true;
 			// Search in already deserialized ones
-			Map<String,Object> dones = (Map<String, Object>) context.get("BeanJsonDeSer_Dones");
+			Map<String,Object> dones = (Map<String, Object>) context.get(CTX_BEAN_JSON_DE_SER_DONES);
 			if (dones != null) {
 				Object done = dones.get(id);
 				if (done != null) return done;
@@ -286,10 +288,10 @@ public class BeanJsonDeSer implements JsonDeSer {
 		}		
 		
 		if (id != null) {
-			Map<String,Object> dones = (Map<String, Object>) context.get("BeanJsonDeSer_Dones");
+			Map<String,Object> dones = (Map<String, Object>) context.get(CTX_BEAN_JSON_DE_SER_DONES);
 			if (dones == null) {
 				dones = new HashMap<>();
-				context.put("BeanJsonDeSer_Dones", dones);
+				context.put(CTX_BEAN_JSON_DE_SER_DONES, dones);
 			}
 			dones.put(id, pre);
 		}

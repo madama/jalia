@@ -11,6 +11,24 @@ import net.etalia.jalia.stream.JsonReader;
 import net.etalia.jalia.stream.JsonToken;
 import net.etalia.jalia.stream.JsonWriter;
 
+/**
+ * Handles de-serialization of {@link Number}s and {@link Boolean}s (both wrappers and natives), {@link Date}s (output
+ * as milliseconds number), {@link CharSequence}s (Strings, StringBuffers etc..), {@link Enum}s (as name of the value),
+ * {@link Class}es (as fully quialified names).
+ *
+ * On deserialization, this class also handles these special cases:
+ * <ul>
+ *     <li>Empty strings mapping to a native number are converted to 0
+ *     <li>Empty strings mapping to a native boolean are converted to false
+ *     <li>Empty strings mapping to anything not string and not native, is converted to null (so, empty strings mapping
+ *     to a string are preserved)
+ *     <li>Numbers mapping to a Date are considered to be full milliseconds timestamps.
+ *     <li>Dates can also be received in formats supported by {@link javax.xml.bind.DatatypeConverter#parseDateTime(String)},
+ *     that is xsd:datetime format, that is a simplified version of ISO 8601 which is the same defined in JavaScript
+ *     for the Date.toJson() function.
+ *     <li>Class names or Enum values that can't be converted will throw exception.
+ * </ul>
+ */
 public class NativeJsonDeSer implements JsonDeSer {
 	
 	private final static Logger LOG = Logger.getLogger(NativeJsonDeSer.class.getName());
@@ -39,7 +57,7 @@ public class NativeJsonDeSer implements JsonDeSer {
 		JsonToken peek = null;
 		try {
 			peek = context.getInput().peek();
-		} catch (Exception e) {}
+		} catch (Exception ignored) {}
 		if (peek == JsonToken.NULL) return 5;
 		
 		if (hint != null && hint.hasConcrete()) {
@@ -61,7 +79,7 @@ public class NativeJsonDeSer implements JsonDeSer {
 		} else if (obj instanceof Number) {
 			output.value((Number)obj);
 		} else if (obj instanceof Boolean) {
-			output.value(((Boolean)obj).booleanValue());
+			output.value((Boolean) obj);
 		} else if (obj instanceof CharSequence) {
 			output.value(((CharSequence)obj).toString());
 		} else if (obj instanceof Enum) {
@@ -79,7 +97,7 @@ public class NativeJsonDeSer implements JsonDeSer {
 		} else if (obj instanceof Date) {
 			output.write(Long.toString(((Date)obj).getTime()));
 		} else if (obj instanceof Number) {
-			output.write(((Number)obj).toString());
+			output.write(obj.toString());
 		} else if (obj instanceof Boolean) {
 			output.write(((Boolean)obj).toString());
 		} else if (obj instanceof CharSequence) {
@@ -97,7 +115,7 @@ public class NativeJsonDeSer implements JsonDeSer {
 	public Object deserialize(JsonContext context, Object pre, TypeUtil hint) throws IOException {
 		JsonReader input = context.getInput();
 		JsonToken peek = input.peek();
-		Object ret = null;
+		Object ret;
 		if (peek == JsonToken.NULL) {
 			input.nextNull();
 			if (hint != null && !hint.isNullable()) {
@@ -156,7 +174,7 @@ public class NativeJsonDeSer implements JsonDeSer {
 							if (dateStr.indexOf('-') != -1) {
 								try {
 									d = javax.xml.bind.DatatypeConverter.parseDateTime(dateStr).getTime();
-								} catch (Exception e) {
+								} catch (Exception ignored) {
 								}
 							}
 							if (d == null) {

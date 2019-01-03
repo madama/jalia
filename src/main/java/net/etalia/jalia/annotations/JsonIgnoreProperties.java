@@ -5,6 +5,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Specify which properties to ignore during JSON serialization and deserialization.
+ */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JsonIgnoreProperties
@@ -12,10 +15,10 @@ public @interface JsonIgnoreProperties
     /**
      * Names of properties to ignore.
      */
-    public String[] value() default { };
+    String[] value() default { };
 
     /**
      * Unused. For compile compatibility only.
      */
-    public boolean ignoreUnknown() default false;
+    boolean ignoreUnknown() default false;
 }
