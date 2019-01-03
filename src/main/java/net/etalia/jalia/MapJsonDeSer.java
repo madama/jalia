@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import net.etalia.jalia.annotations.JsonMap;
 import net.etalia.jalia.stream.JsonReader;
 import net.etalia.jalia.stream.JsonToken;
 import net.etalia.jalia.stream.JsonWriter;
@@ -16,6 +17,10 @@ import net.etalia.jalia.stream.JsonWriter;
  * being {@link BeanJsonDeSer} when an "@class" is present.
  */
 public class MapJsonDeSer implements JsonDeSer {
+
+	public static final String RETAIN = "MAP_JSON_DESER_RETAIN";
+	public static final String DROP = "MAP_JSON_DESER_DROP";
+	public static final String CLEAR = "MAP_JSON_DESER_CLEAR";
 
 	@Override
 	public int handlesSerialization(JsonContext context, Class<?> clazz) {
@@ -63,11 +68,14 @@ public class MapJsonDeSer implements JsonDeSer {
 	/**
 	 * During deserialization the following happens:
 	 * <ul>
-	 *     <li>The existing Map is reused if possible, otherwise a new {@link HashMap} is created.
-	 *     <li>Existing objects found with the same key are reused.
+	 *     <li>The existing Map is reused if possible.
+	 *     <li>If it can't be reused (not found a map) or if {@link JsonMap#drop()} was set to true, a new
+	 *     {@link HashMap} is created.
+	 *     <li>If {@link JsonMap#clear()} was set to true, the map is cleared.
+	 *     <li>Otherwise, existing objects found with the same key are reused.
 	 *     <li>Primitive numbers are reduced from double to long if they are integers, and/or from long to integer
 	 *     if they are within integer limits.
-	 *     <li>Keys not found in the JSON are removed from the map.
+	 *     <li>Unless {@link JsonMap#retain()} was set to true, keys not found in the JSON are removed from the map.
 	 * </ul>
 	 * @param context The current deserialization context.
 	 * @param pre The existing value to modify if any, null otherwise.
@@ -75,10 +83,12 @@ public class MapJsonDeSer implements JsonDeSer {
 	 * @return the deserialized object
 	 * @throws IOException if read operation from underlying JsonReader fails
 	 */
-	// TODO add a JsonMap annotation, similar to JsonCollection, to preserve existing keys and to clear the map
 	@Override
 	public Object deserialize(JsonContext context, Object pre, TypeUtil hint) throws IOException {
-		Map<String,Object> act = (Map<String, Object>) pre;
+		Map<String,Object> act = null;
+		if (pre instanceof Map) {
+			act = (Map<String, Object>) pre;
+		}
 		TypeUtil inner = null;
 		if (act == null) {
 			if (hint != null) {
@@ -92,9 +102,13 @@ public class MapJsonDeSer implements JsonDeSer {
 				}
 				inner = hint.findReturnTypeOf("remove", Object.class);
 			}
-			if (act == null) act = new HashMap<>();
 		}
-		
+
+		if (act == null || context.getFromStackBoolean(DROP)) {
+			act = new HashMap<>();
+		} else if (context.getFromStackBoolean(CLEAR)) {
+			act.clear();
+		}
 		JsonReader input = context.getInput();
 		input.beginObject();
 		Set<String> keys = new HashSet<String>();
@@ -103,7 +117,11 @@ public class MapJsonDeSer implements JsonDeSer {
 			String name = input.nextName();
 			keys.add(name);
 			Object preval = read.get(name);
-			Object val = context.getMapper().readValue(context, preval, inner);
+			TypeUtil useHint = inner;
+			if (useHint == null && preval != null) {
+				useHint = TypeUtil.get(preval.getClass());
+			}
+			Object val = context.getMapper().readValue(context, preval, useHint);
 			val = reduceNumber(val);
 			try {
 				act.put(name, val);
@@ -113,8 +131,10 @@ public class MapJsonDeSer implements JsonDeSer {
 				act.put(name, val);
 			}
 		}
-		for (Iterator<String> iter = act.keySet().iterator(); iter.hasNext();) {
-			if (!keys.contains(iter.next())) iter.remove();
+		if (!context.getFromStackBoolean(RETAIN)) {
+			for (Iterator<String> iter = act.keySet().iterator(); iter.hasNext(); ) {
+				if (!keys.contains(iter.next())) iter.remove();
+			}
 		}
 		input.endObject();
 		return act;

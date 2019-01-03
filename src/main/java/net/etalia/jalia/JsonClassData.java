@@ -13,16 +13,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import net.etalia.jalia.annotations.JsonCollection;
-import net.etalia.jalia.annotations.JsonDefaultFields;
-import net.etalia.jalia.annotations.JsonRequireIdForReuse;
-import net.etalia.jalia.annotations.JsonGetter;
-import net.etalia.jalia.annotations.JsonIgnore;
-import net.etalia.jalia.annotations.JsonIgnoreProperties;
-import net.etalia.jalia.annotations.JsonInclude;
+import net.etalia.jalia.annotations.*;
 import net.etalia.jalia.annotations.JsonInclude.Include;
-import net.etalia.jalia.annotations.JsonOnDemandOnly;
-import net.etalia.jalia.annotations.JsonSetter;
 import net.etalia.utils.MissHolder;
 
 public class JsonClassData {
@@ -321,6 +313,12 @@ public class JsonClassData {
 			JsonCollection ann = ele.getAnnotation(JsonCollection.class);
 			opts.put(ListJsonDeSer.DROP, ann.drop());
 			opts.put(ListJsonDeSer.CLEAR, ann.clear());
+		}
+		if (ele.isAnnotationPresent(JsonMap.class)) {
+			JsonMap ann = ele.getAnnotation(JsonMap.class);
+			opts.put(MapJsonDeSer.RETAIN, ann.retain());
+			opts.put(MapJsonDeSer.DROP, ann.drop());
+			opts.put(MapJsonDeSer.CLEAR, ann.clear());
 		}
 	}
 
