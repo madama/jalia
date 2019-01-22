@@ -109,7 +109,7 @@ public class OutFieldTest {
 				"{'group': [" +
 						"['prop1','prop2']," +
 						"{'link1': ['prop1','prop2']}, " +
-						"'link2.*' " +
+						"'link2.*,link3' " +
 						"]}").replace("'","\"");
 		OutField.getGroups().clear();
 		OutField.parseGroupsJson(new StringReader(groupJson));
@@ -117,6 +117,6 @@ public class OutFieldTest {
 		assertThat(OutField.getGroups(), hasKey("group"));
 		OutField group = OutField.getGroups().get("group");
 		Set<String> stringList = group.toStringList();
-		assertThat(stringList, containsInAnyOrder("prop1", "prop2", "link1", "link1.prop1", "link1.prop2", "link2"));
+		assertThat(stringList, containsInAnyOrder("prop1", "prop2", "link1", "link1.prop1", "link1.prop2", "link2", "link3"));
 	}
 }

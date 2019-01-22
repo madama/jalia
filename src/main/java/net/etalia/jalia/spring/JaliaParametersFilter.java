@@ -12,9 +12,12 @@ import javax.servlet.ServletResponse;
 import net.etalia.jalia.OutField;
 
 public class JaliaParametersFilter implements Filter {
-	
+
+	public static final String PARAMETER_NAME = "parameterName";
+	public static final String GROUP_PARAMETER_NAME = "groupParameterName";
+
 	private static final ThreadLocal<OutField> fields = new ThreadLocal<>();
-	
+
 	private String parameterName;
 	private String groupParameterName;
 
@@ -28,6 +31,13 @@ public class JaliaParametersFilter implements Filter {
 
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+		if (groupParameterName != null) {
+			String groupName = req.getParameter(groupParameterName);
+			if (groupName != null) {
+				OutField root = OutField.getGroups().get(groupName);
+				fields.set(root);
+			}
+		}
 		if (parameterName != null) {
 			String properties = req.getParameter(parameterName);
 			if (properties != null) {
@@ -35,12 +45,6 @@ public class JaliaParametersFilter implements Filter {
 				for (String prop : properties.split(",")) {
 					root.getCreateSub(prop);
 				}
-				fields.set(root);
-			}
-		} else if (groupParameterName != null) {
-			String groupName = req.getParameter(groupParameterName);
-			if (groupName != null) {
-				OutField root = OutField.getGroups().get(groupName);
 				fields.set(root);
 			}
 		}
@@ -53,8 +57,8 @@ public class JaliaParametersFilter implements Filter {
 
 	@Override
 	public void init(FilterConfig config) {
-		parameterName = config.getInitParameter("parameterName");
-		groupParameterName = config.getInitParameter("groupParameterName");
+		parameterName = config.getInitParameter(PARAMETER_NAME);
+		groupParameterName = config.getInitParameter(GROUP_PARAMETER_NAME);
 	}
 
 	public static void clean() {

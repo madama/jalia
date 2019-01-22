@@ -257,10 +257,11 @@ public class OutField {
 	/**
 	 * Parses a JSON containing group configurations and add it to the current groups.
 	 * <p>
-	 *     JSON format is rather flexible, accepting simple arrays:
+	 *     JSON format is rather flexible, accepting simple arrays or comma separated lsits:
 	 *     <code>
 	 *         {
-	 *             "groupName": ["field1", "field2", "link.field1", "link.field2", "otherLink.*"]
+	 *             "groupName": ["field1", "field2", "link.field1", "link.field2", "otherLink.*"],
+	 *             "otherGroup": "field1,field2"
 	 *         }
 	 *     </code>
 	 *     As well as nexted objects:
@@ -312,7 +313,10 @@ public class OutField {
 		if (value instanceof Boolean) {
 			definitions.add(prefix.substring(0, prefix.length() - 1));
 		} else if (value instanceof String) {
-			definitions.add(prefix + value);
+			String[] segments = ((String) value).split(",");
+			for (String segment : segments) {
+				definitions.add(prefix + segment);
+			}
 		} else if (value instanceof Iterable) {
 			for (Object entry : (Iterable)value) {
 				recurseParseGroupJson(entry, prefix, definitions);
