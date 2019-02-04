@@ -14,9 +14,9 @@ public interface EntityFactory {
 	 * Converts the given entity to an "id" to be used when serializing the entity to Json.
 	 * @param entity The entity to be serialized.
 	 * @param context The current JsonContext.
-	 * @return a string representation of the "id" of this entity.
+	 * @return the "id" of this entity.
 	 */
-	String getId(Object entity, JsonContext context);
+	Object getId(Object entity, JsonContext context);
 
 	/**
 	 * Builds an entity of the given class, for the given "id", during deserialization. The returned entity will then
@@ -27,7 +27,7 @@ public interface EntityFactory {
 	 * @return A live entity that will eventually then be manipulated (by calling setters and getters) by the
 	 * deserializer.
 	 */
-	Object buildEntity(Class<?> clazz, String id, JsonContext context);
+	Object buildEntity(Class<?> clazz, Object id, JsonContext context);
 
 	/**
 	 * Generic hook called by {@link BeanJsonDeSer} before starting de-serialization of an entity.

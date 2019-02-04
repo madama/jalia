@@ -411,6 +411,14 @@ public class TypeUtil {
 		return null;
 	}
 
+	public boolean isDescendantOf(TypeUtil other) {
+		return other.getConcrete().isAssignableFrom(this.getConcrete());
+	}
+
+	public boolean isParentOf(TypeUtil other) {
+		return this.getConcrete().isAssignableFrom(other.getConcrete());
+	}
+
 	/**
 	 * Inner class used to define inline types.
 	 * <p>

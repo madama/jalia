@@ -100,8 +100,10 @@ public class MapJsonDeSer implements JsonDeSer {
 						e.printStackTrace();
 					}
 				}
-				inner = hint.findReturnTypeOf("remove", Object.class);
 			}
+		}
+		if (hint != null) {
+			inner = hint.findReturnTypeOf("remove", Object.class);
 		}
 
 		if (act == null || context.getFromStackBoolean(DROP)) {
@@ -115,20 +117,30 @@ public class MapJsonDeSer implements JsonDeSer {
 		Map<String,Object> read = act;
 		while (input.hasNext()) {
 			String name = input.nextName();
+			boolean wasAllowNew = context.getFromStackBoolean(BeanJsonDeSer.ALLOW_NEW);
+			context.deserializationEntering(name);
+			context.putLocalStack(BeanJsonDeSer.ALLOW_NEW, wasAllowNew);
 			keys.add(name);
 			Object preval = read.get(name);
 			TypeUtil useHint = inner;
-			if (useHint == null && preval != null) {
+			if (preval != null) {
 				useHint = TypeUtil.get(preval.getClass());
+				if (inner != null && !inner.isParentOf(useHint)) {
+					useHint = inner;
+				}
 			}
-			Object val = context.getMapper().readValue(context, preval, useHint);
-			val = reduceNumber(val);
 			try {
-				act.put(name, val);
-			} catch (UnsupportedOperationException e) {
-				// Could happen because or a read only map, try using a normal map
-				act = new HashMap<>();
-				act.put(name, val);
+				Object val = context.getMapper().readValue(context, preval, useHint);
+				val = reduceNumber(val);
+				try {
+					act.put(name, val);
+				} catch (UnsupportedOperationException e) {
+					// Could happen because or a read only map, try using a normal map
+					act = new HashMap<>();
+					act.put(name, val);
+				}
+			} finally {
+				context.deserializationExited();
 			}
 		}
 		if (!context.getFromStackBoolean(RETAIN)) {

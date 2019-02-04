@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class ObjectMapperSerializeTest {
+public class ObjectMapperSerializeTest extends TestBase {
 	
 	public enum TestEnum {
 		VAL1,
@@ -57,26 +57,26 @@ public class ObjectMapperSerializeTest {
 		String json = writer.toString();
 		System.out.println(json);
 		
-		assertThat(json, containsString("\"testEnum\":"));
-		assertThat(json, containsString("\"VAL1\""));
+		checkThat(json, containsString("\"testEnum\":"));
+		checkThat(json, containsString("\"VAL1\""));
 		
-		assertThat(json, containsString("\"testString\":"));
-		assertThat(json, containsString("\"string\""));
+		checkThat(json, containsString("\"testString\":"));
+		checkThat(json, containsString("\"string\""));
 		
-		assertThat(json, containsString("\"testInt\":"));
-		assertThat(json, containsString("1"));
+		checkThat(json, containsString("\"testInt\":"));
+		checkThat(json, containsString("1"));
 		
-		assertThat(json, containsString("\"testBoolean\":"));
-		assertThat(json, containsString("true"));
+		checkThat(json, containsString("\"testBoolean\":"));
+		checkThat(json, containsString("true"));
 		
-		assertThat(json, containsString("\"testLong\":"));
-		assertThat(json, containsString("100"));
+		checkThat(json, containsString("\"testLong\":"));
+		checkThat(json, containsString("100"));
 		
-		assertThat(json, containsString("\"testMap\":"));
-		assertThat(json, containsString("\"subString\":"));
+		checkThat(json, containsString("\"testMap\":"));
+		checkThat(json, containsString("\"subString\":"));
 		
-		assertThat(json, containsString("\"subEmptyList\":"));
-		assertThat(json, containsString("[]"));
+		checkThat(json, containsString("\"subEmptyList\":"));
+		checkThat(json, containsString("[]"));
 	}
 	
 	@Test
@@ -101,11 +101,11 @@ public class ObjectMapperSerializeTest {
 		String json = sw.toString();
 		System.out.println(json);
 		
-		assertThat(json, containsString("\"string\""));
-		assertThat(json, containsString("\"substring\""));
-		assertThat(json, containsString("\"arr1\""));
-		assertThat(json, containsString("\"arr2\""));
-		assertThat(json, containsString("1"));
+		checkThat(json, containsString("\"string\""));
+		checkThat(json, containsString("\"substring\""));
+		checkThat(json, containsString("\"arr1\""));
+		checkThat(json, containsString("\"arr2\""));
+		checkThat(json, containsString("1"));
 		
 	}
 	
@@ -138,23 +138,23 @@ public class ObjectMapperSerializeTest {
 			String json = writer.toString();
 			System.out.println(json);
 			
-			assertThat(json, containsString("\"testString\":"));
-			assertThat(json, containsString("\"string\""));
+			checkThat(json, containsString("\"testString\":"));
+			checkThat(json, containsString("\"string\""));
 			
-			assertThat(json, containsString("\"testBoolean\":"));
-			assertThat(json, containsString("true"));
+			checkThat(json, containsString("\"testBoolean\":"));
+			checkThat(json, containsString("true"));
 			
-			assertThat(json, not(containsString("\"testEnum\":")));
-			assertThat(json, not(containsString("\"VAL1\"")));
+			checkThat(json, not(containsString("\"testEnum\":")));
+			checkThat(json, not(containsString("\"VAL1\"")));
 			
-			assertThat(json, not(containsString("\"testInt\":")));
-			assertThat(json, not(containsString("1")));
+			checkThat(json, not(containsString("\"testInt\":")));
+			checkThat(json, not(containsString("1")));
 			
-			assertThat(json, not(containsString("\"testLong\":")));
-			assertThat(json, not(containsString("100")));
+			checkThat(json, not(containsString("\"testLong\":")));
+			checkThat(json, not(containsString("100")));
 			
-			assertThat(json, not(containsString("\"testMap\":")));
-			assertThat(json, not(containsString("\"subString\":")));
+			checkThat(json, not(containsString("\"testMap\":")));
+			checkThat(json, not(containsString("\"subString\":")));
 		}
 		
 		{
@@ -168,23 +168,23 @@ public class ObjectMapperSerializeTest {
 			String json = writer.toString();
 			System.out.println(json);
 			
-			assertThat(json, containsString("\"testString\":"));
-			assertThat(json, containsString("\"string\""));
+			checkThat(json, containsString("\"testString\":"));
+			checkThat(json, containsString("\"string\""));
 			
-			assertThat(json, not(containsString("\"testBoolean\":")));
-			assertThat(json, not(containsString("true")));
+			checkThat(json, not(containsString("\"testBoolean\":")));
+			checkThat(json, not(containsString("true")));
 			
-			assertThat(json, not(containsString("\"testEnum\":")));
-			assertThat(json, not(containsString("\"VAL1\"")));
+			checkThat(json, not(containsString("\"testEnum\":")));
+			checkThat(json, not(containsString("\"VAL1\"")));
 			
-			assertThat(json, not(containsString("\"testInt\":")));
-			assertThat(json, not(containsString("1")));
+			checkThat(json, not(containsString("\"testInt\":")));
+			checkThat(json, not(containsString("1")));
 			
-			assertThat(json, not(containsString("\"testLong\":")));
-			assertThat(json, not(containsString("100")));
+			checkThat(json, not(containsString("\"testLong\":")));
+			checkThat(json, not(containsString("100")));
 			
-			assertThat(json, containsString("\"testMap\":"));
-			assertThat(json, containsString("\"subString\":"));
+			checkThat(json, containsString("\"testMap\":"));
+			checkThat(json, containsString("\"subString\":"));
 		}
 
 		{
@@ -198,23 +198,23 @@ public class ObjectMapperSerializeTest {
 			String json = writer.toString();
 			System.out.println(json);
 			
-			assertThat(json, containsString("\"testString\":"));
-			assertThat(json, containsString("\"string\""));
+			checkThat(json, containsString("\"testString\":"));
+			checkThat(json, containsString("\"string\""));
 			
-			assertThat(json, not(containsString("\"testBoolean\":")));
-			assertThat(json, not(containsString("true")));
+			checkThat(json, not(containsString("\"testBoolean\":")));
+			checkThat(json, not(containsString("true")));
 			
-			assertThat(json, not(containsString("\"testEnum\":")));
-			assertThat(json, not(containsString("\"VAL1\"")));
+			checkThat(json, not(containsString("\"testEnum\":")));
+			checkThat(json, not(containsString("\"VAL1\"")));
 			
-			assertThat(json, not(containsString("\"testInt\":")));
-			assertThat(json, not(containsString("1")));
+			checkThat(json, not(containsString("\"testInt\":")));
+			checkThat(json, not(containsString("1")));
 			
-			assertThat(json, not(containsString("\"testLong\":")));
-			assertThat(json, not(containsString("100")));
+			checkThat(json, not(containsString("\"testLong\":")));
+			checkThat(json, not(containsString("100")));
 			
-			assertThat(json, containsString("\"testMap\":"));
-			assertThat(json, containsString("\"subString\":"));
+			checkThat(json, containsString("\"testMap\":"));
+			checkThat(json, containsString("\"subString\":"));
 		}
 		
 	}
@@ -245,31 +245,31 @@ public class ObjectMapperSerializeTest {
 		String json = mapper.writeValueAsString(person, null);
 		System.out.println(json);
 		
-		assertThat(json, containsString("\"name\":"));
-		assertThat(json, containsString("\"Simone\""));
+		checkThat(json, containsString("\"name\":"));
+		checkThat(json, containsString("\"Simone\""));
 		
-		assertThat(json, containsString("\"surname\":"));
-		assertThat(json, containsString("\"Gianni\""));
+		checkThat(json, containsString("\"surname\":"));
+		checkThat(json, containsString("\"Gianni\""));
 		
-		assertThat(json, containsString("\"addresses\":"));
+		checkThat(json, containsString("\"addresses\":"));
 		
-		assertThat(json, containsString("\"address\":"));
-		assertThat(json, containsString("\"simoneg@apache.org\""));
+		checkThat(json, containsString("\"address\":"));
+		checkThat(json, containsString("\"simoneg@apache.org\""));
 		
-		assertThat(json, containsString("\"type\":"));
-		assertThat(json, containsString("\"EMAIL\""));
+		checkThat(json, containsString("\"type\":"));
+		checkThat(json, containsString("\"EMAIL\""));
 		
-		assertThat(json, containsString("\"identifier\":"));
-		assertThat(json, containsString("\"p1\""));
-		assertThat(json, containsString("\"a1\""));
+		checkThat(json, containsString("\"identifier\":"));
+		checkThat(json, containsString("\"p1\""));
+		checkThat(json, containsString("\"a1\""));
 
-		assertThat(json, containsString("\"tags\":"));
-		assertThat(json, containsString("\"tag1\""));
-		assertThat(json, containsString("\"tag2\""));
+		checkThat(json, containsString("\"tags\":"));
+		checkThat(json, containsString("\"tag1\""));
+		checkThat(json, containsString("\"tag2\""));
 		
-		assertThat(json, containsString("\"birthDay\":1000"));
+		checkThat(json, containsString("\"birthDay\":1000"));
 		
-		assertThat(json, not(containsString("\"defaultType\"")));
+		checkThat(json, not(containsString("\"defaultType\"")));
 		
 	}
 	
@@ -281,12 +281,12 @@ public class ObjectMapperSerializeTest {
 		person.setSurname(null);
 		
 		String json = om.writeValueAsString(person);
-		assertThat(json, not(containsString("\"surname\":")));
+		checkThat(json, not(containsString("\"surname\":")));
 		
 		om.setOption(DefaultOptions.INCLUDE_NULLS, true);
 		json = om.writeValueAsString(person);
-		assertThat(json, containsString("\"surname\":"));
-		assertThat(json, containsString("null"));
+		checkThat(json, containsString("\"surname\":"));
+		checkThat(json, containsString("null"));
 	}
 	
 	
@@ -298,7 +298,7 @@ public class ObjectMapperSerializeTest {
 		person.getAddresses().clear();
 		
 		String json = om.writeValueAsString(person);
-		assertThat(json, not(containsString("\"addresses\":")));
+		checkThat(json, not(containsString("\"addresses\":")));
 	}
 	
 	@Test
@@ -307,15 +307,15 @@ public class ObjectMapperSerializeTest {
 
 		{
 			String json = om.writeValueAsString(new ArrayList<String>());
-			assertThat(json, equalTo("[]"));
+			checkThat(json, equalTo("[]"));
 		}
 		{
 			String json = om.writeValueAsString(new String[] {});
-			assertThat(json, equalTo("[]"));
+			checkThat(json, equalTo("[]"));
 		}
 		{
 			String json = om.writeValueAsString(new HashMap<String,String>());
-			assertThat(json, equalTo("{}"));
+			checkThat(json, equalTo("{}"));
 		}
 	}
 	
@@ -347,9 +347,9 @@ public class ObjectMapperSerializeTest {
 		
 		System.out.println(json);
 		
-		assertThat(json,containsString("p1"));
-		assertThat(json,containsString("p2"));
-		assertThat(json,containsString("[\"p1\"]"));
+		checkThat(json,containsString("p1"));
+		checkThat(json,containsString("p2"));
+		checkThat(json,containsString("[\"p1\"]"));
 	}
 	
 	@Test
@@ -435,17 +435,17 @@ public class ObjectMapperSerializeTest {
 			json = om.writeValueAsString(map);
 			System.out.println(json);
 			// Assert each p1 and p2 are serialized only once
-			assertThat(countOccurrencies("\"id\":\"p1\"", json),equalTo(1));
-			assertThat(countOccurrencies("\"id\":\"p2\"", json),equalTo(1));
+			checkThat(countOccurrencies("\"id\":\"p1\"", json),equalTo(1));
+			checkThat(countOccurrencies("\"id\":\"p2\"", json),equalTo(1));
 			
 			// Assert the others all have only the id
 			// p1 is in id:p1 when unrolled, then "p1" in the kpl list, then ["p1"] in friends of p2, then in kp1 and kp1_2
-			assertThat(countOccurrencies("\"p1\"", json), equalTo(5));
+			checkThat(countOccurrencies("\"p1\"", json), equalTo(5));
 			// p2 is in id:p2 when unrolled, then in kp2 and kp2_2
-			assertThat(countOccurrencies("\"p2\"", json), equalTo(3));
+			checkThat(countOccurrencies("\"p2\"", json), equalTo(3));
 
-			assertThat(json,containsString("\"kempty\":["));
-			assertThat(json,not(containsString("kloop")));
+			checkThat(json,containsString("\"kempty\":["));
+			checkThat(json,not(containsString("kloop")));
 		}
 		
 		{
@@ -453,14 +453,14 @@ public class ObjectMapperSerializeTest {
 			String json = null;
 			json = om.writeValueAsString(map);
 			System.out.println(json);			
-			assertThat(json,containsString("\"kp2_2\":{"));
-			assertThat(json,containsString("\"friends\":[{"));
-			assertThat(json,containsString("\"kp1_2\":{"));
-			assertThat(json,containsString("\"kp1\":{"));
-			assertThat(json,containsString("\"kp2\":{"));
-			assertThat(json,containsString("\"kpl\":[{"));
-			assertThat(json,containsString("\"kempty\":["));
-			assertThat(json,not(containsString("kloop")));
+			checkThat(json,containsString("\"kp2_2\":{"));
+			checkThat(json,containsString("\"friends\":[{"));
+			checkThat(json,containsString("\"kp1_2\":{"));
+			checkThat(json,containsString("\"kp1\":{"));
+			checkThat(json,containsString("\"kp2\":{"));
+			checkThat(json,containsString("\"kpl\":[{"));
+			checkThat(json,containsString("\"kempty\":["));
+			checkThat(json,not(containsString("kloop")));
 		}
 	}
 
@@ -479,20 +479,20 @@ public class ObjectMapperSerializeTest {
 			String json = mapper.writeValueAsString(person, of);
 			System.out.println(json);
 			
-			assertThat(json, containsString("\"name\":"));
-			assertThat(json, containsString("\"Simone\""));
+			checkThat(json, containsString("\"name\":"));
+			checkThat(json, containsString("\"Simone\""));
 			
-			assertThat(json, not(containsString("\"surname\":")));
-			assertThat(json, not(containsString("\"Gianni\"")));
+			checkThat(json, not(containsString("\"surname\":")));
+			checkThat(json, not(containsString("\"Gianni\"")));
 			
-			assertThat(json, containsString("\"addresses\":"));
+			checkThat(json, containsString("\"addresses\":"));
 			
-			assertThat(json, containsString("\"address\":"));
-			assertThat(json, containsString("\"simoneg@apache.org\""));
+			checkThat(json, containsString("\"address\":"));
+			checkThat(json, containsString("\"simoneg@apache.org\""));
 			
-			assertThat(json, not(containsString("\"type\":")));
-			assertThat(json, not(containsString("\"EMAIL\"")));
-			assertThat(json, not(containsString("\"similars\":")));
+			checkThat(json, not(containsString("\"type\":")));
+			checkThat(json, not(containsString("\"EMAIL\"")));
+			checkThat(json, not(containsString("\"similars\":")));
 			
 		}
 		{
@@ -503,19 +503,19 @@ public class ObjectMapperSerializeTest {
 			String json = mapper.writeValueAsString(person, of);
 			System.out.println(json);
 			
-			assertThat(json, containsString("\"name\":"));
-			assertThat(json, containsString("\"Simone\""));
+			checkThat(json, containsString("\"name\":"));
+			checkThat(json, containsString("\"Simone\""));
 			
-			assertThat(json, not(containsString("\"surname\":")));
-			assertThat(json, not(containsString("\"Gianni\"")));
+			checkThat(json, not(containsString("\"surname\":")));
+			checkThat(json, not(containsString("\"Gianni\"")));
 			
-			assertThat(json, containsString("\"addresses\":"));
+			checkThat(json, containsString("\"addresses\":"));
 			
-			assertThat(json, containsString("\"address\":"));
-			assertThat(json, containsString("\"simoneg@apache.org\""));
+			checkThat(json, containsString("\"address\":"));
+			checkThat(json, containsString("\"simoneg@apache.org\""));
 			
-			assertThat(json, containsString("\"type\":"));
-			assertThat(json, containsString("\"EMAIL\""));
+			checkThat(json, containsString("\"type\":"));
+			checkThat(json, containsString("\"EMAIL\""));
 		}
 		{
 			OutField of = new OutField(null);
@@ -525,13 +525,13 @@ public class ObjectMapperSerializeTest {
 			String json = mapper.writeValueAsString(person, of);
 			System.out.println(json);
 			
-			assertThat(json, containsString("\"name\":"));
-			assertThat(json, containsString("\"Simone\""));
+			checkThat(json, containsString("\"name\":"));
+			checkThat(json, containsString("\"Simone\""));
 			
-			assertThat(json, not(containsString("\"surname\":")));
-			assertThat(json, not(containsString("\"Gianni\"")));
+			checkThat(json, not(containsString("\"surname\":")));
+			checkThat(json, not(containsString("\"Gianni\"")));
 			
-			assertThat(json, containsString("\"similars\":"));
+			checkThat(json, containsString("\"similars\":"));
 		}
 		
 	}
@@ -550,8 +550,8 @@ public class ObjectMapperSerializeTest {
 			String json = mapper.writeValueAsString(person, of);
 			System.out.println(json);
 			
-			assertThat(json, not(containsString("Doremi")));
-			assertThat(json, not(containsString("addressTag1")));
+			checkThat(json, not(containsString("Doremi")));
+			checkThat(json, not(containsString("addressTag1")));
 		}
 		{
 			OutField of = new OutField(null);
@@ -561,8 +561,8 @@ public class ObjectMapperSerializeTest {
 			String json = mapper.writeValueAsString(person, of);
 			System.out.println(json);
 			
-			assertThat(json, containsString("Doremi"));
-			assertThat(json, containsString("addressTag1"));
+			checkThat(json, containsString("Doremi"));
+			checkThat(json, containsString("addressTag1"));
 		}
 		// TODO we could implement this, the double star
 		/*
@@ -576,7 +576,7 @@ public class ObjectMapperSerializeTest {
 			String json = mapper.writeValueAsString(map, of);
 			System.out.println(json);
 			
-			assertThat(json, containsString("addressTag1"));
+			checkThat(json, containsString("addressTag1"));
 		}
 		*/
 	}
@@ -595,17 +595,17 @@ public class ObjectMapperSerializeTest {
 		String json = mapper.writeValueAsString(person, null);
 		System.out.println(json);
 		
-		assertThat(json, containsString("\"@entity\":"));
-		assertThat(json, containsString("\"Person\""));
+		checkThat(json, containsString("\"@entity\":"));
+		checkThat(json, containsString("\"Person\""));
 
-		assertThat(json, containsString("\"@entity\":"));
-		assertThat(json, containsString("\"Address\""));
+		checkThat(json, containsString("\"@entity\":"));
+		checkThat(json, containsString("\"Address\""));
 		
-		assertThat(json, containsString("\"id\":"));
-		assertThat(json, containsString("\"p1\""));
-		assertThat(json, containsString("\"a1\""));
+		checkThat(json, containsString("\"id\":"));
+		checkThat(json, containsString("\"p1\""));
+		checkThat(json, containsString("\"a1\""));
 		
-		assertThat(json, not(containsString("\"identifier\":")));
+		checkThat(json, not(containsString("\"identifier\":")));
 	}
 	
 	@Test
@@ -626,18 +626,18 @@ public class ObjectMapperSerializeTest {
 			da.setInclNotNull(null);
 			String json = mapper.writeValueAsString(da, of);
 			System.out.println(json);
-			assertThat(json, containsString("inclAlways"));
-			assertThat(json, not(containsString("inclNotNull")));
-			assertThat(json, not(containsString("inclNotEmpty")));
+			checkThat(json, containsString("inclAlways"));
+			checkThat(json, not(containsString("inclNotNull")));
+			checkThat(json, not(containsString("inclNotEmpty")));
 		}
 		// all empty
 		{
 			DummyAnnotations da = new DummyAnnotations();
 			String json = mapper.writeValueAsString(da, of);
 			System.out.println(json);
-			assertThat(json, containsString("inclAlways"));
-			assertThat(json, containsString("inclNotNull"));
-			assertThat(json, not(containsString("inclNotEmpty")));
+			checkThat(json, containsString("inclAlways"));
+			checkThat(json, containsString("inclNotNull"));
+			checkThat(json, not(containsString("inclNotEmpty")));
 		}
 		// all with elements
 		{
@@ -647,9 +647,9 @@ public class ObjectMapperSerializeTest {
 			da.setInclNotNull(Arrays.asList("test"));
 			String json = mapper.writeValueAsString(da, of);
 			System.out.println(json);
-			assertThat(json, containsString("inclAlways"));
-			assertThat(json, containsString("inclNotNull"));
-			assertThat(json, containsString("inclNotEmpty"));
+			checkThat(json, containsString("inclAlways"));
+			checkThat(json, containsString("inclNotNull"));
+			checkThat(json, containsString("inclNotEmpty"));
 		}
 		// all ignore
 		{
@@ -660,10 +660,10 @@ public class ObjectMapperSerializeTest {
 			da.setHidden2("test");
 			String json = mapper.writeValueAsString(da, of);
 			System.out.println(json);
-			assertThat(json, not(containsString("secretByGetter")));
-			assertThat(json, not(containsString("secretBySetter")));
-			assertThat(json, not(containsString("hidden1")));
-			assertThat(json, not(containsString("hidden2")));
+			checkThat(json, not(containsString("secretByGetter")));
+			checkThat(json, not(containsString("secretBySetter")));
+			checkThat(json, not(containsString("hidden1")));
+			checkThat(json, not(containsString("hidden2")));
 		}
 	}
 	
@@ -671,11 +671,11 @@ public class ObjectMapperSerializeTest {
 	public void invalidNativeSerialization() throws Exception {
 		ObjectMapper om = new ObjectMapper();
 		
-		assertThat(om.writeValueAsString("ciao"), equalTo("ciao"));
-		assertThat(om.writeValueAsString(1), equalTo("1"));
-		assertThat(om.writeValueAsString(1.0d), equalTo("1.0"));
-		assertThat(om.writeValueAsString(true), equalTo("true"));
-		assertThat(om.writeValueAsString(null), equalTo("null"));
+		checkThat(om.writeValueAsString("ciao"), equalTo("ciao"));
+		checkThat(om.writeValueAsString(1), equalTo("1"));
+		checkThat(om.writeValueAsString(1.0d), equalTo("1.0"));
+		checkThat(om.writeValueAsString(true), equalTo("true"));
+		checkThat(om.writeValueAsString(null), equalTo("null"));
 	}
 
 }

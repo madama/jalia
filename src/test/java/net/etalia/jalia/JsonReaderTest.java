@@ -10,7 +10,7 @@ import net.etalia.jalia.stream.JsonToken;
 
 import org.junit.Test;
 
-public class JsonReaderTest {
+public class JsonReaderTest extends TestBase {
 
 	@Test
 	public void test() throws Exception {
@@ -24,19 +24,19 @@ public class JsonReaderTest {
 		{
 			JsonReader la = jr.lookAhead();
 			la.beginObject();
-			assertThat(la.hasNext(), equalTo(true));
-			assertThat(la.nextName(), equalTo("a1"));
-			assertThat(la.nextInt(), equalTo(1));
-			assertThat(la.hasNext(), equalTo(true));
-			assertThat(la.nextName(), equalTo("a2"));
-			assertThat(la.nextString(), equalTo("a2"));
-			assertThat(la.hasNext(), equalTo(true));
-			assertThat(la.nextName(), equalTo("s1"));
-			assertThat(la.peek(), equalTo(JsonToken.BEGIN_OBJECT));
+			checkThat(la.hasNext(), equalTo(true));
+			checkThat(la.nextName(), equalTo("a1"));
+			checkThat(la.nextInt(), equalTo(1));
+			checkThat(la.hasNext(), equalTo(true));
+			checkThat(la.nextName(), equalTo("a2"));
+			checkThat(la.nextString(), equalTo("a2"));
+			checkThat(la.hasNext(), equalTo(true));
+			checkThat(la.nextName(), equalTo("s1"));
+			checkThat(la.peek(), equalTo(JsonToken.BEGIN_OBJECT));
 			la.skipValue();
-			assertThat(la.hasNext(), equalTo(true));
-			assertThat(la.nextName(), equalTo("a3"));
-			assertThat(la.nextString(), equalTo("a3"));
+			checkThat(la.hasNext(), equalTo(true));
+			checkThat(la.nextName(), equalTo("a3"));
+			checkThat(la.nextString(), equalTo("a3"));
 			la.endObject();
 			
 			la.close();
@@ -44,32 +44,32 @@ public class JsonReaderTest {
 		
 		// Try read some stuff
 		jr.beginObject();
-		assertThat(jr.hasNext(), equalTo(true));
-		assertThat(jr.nextName(), equalTo("a1"));
-		assertThat(jr.nextInt(), equalTo(1));
+		checkThat(jr.hasNext(), equalTo(true));
+		checkThat(jr.nextName(), equalTo("a1"));
+		checkThat(jr.nextInt(), equalTo(1));
 		
 		// Try intermediate fork
 		{
 			JsonReader la = jr.lookAhead();
-			assertThat(la.hasNext(), equalTo(true));
-			assertThat(la.nextName(), equalTo("a2"));
-			assertThat(la.nextString(), equalTo("a2"));
-			assertThat(la.hasNext(), equalTo(true));
-			assertThat(la.nextName(), equalTo("s1"));
-			assertThat(la.peek(), equalTo(JsonToken.BEGIN_OBJECT));
+			checkThat(la.hasNext(), equalTo(true));
+			checkThat(la.nextName(), equalTo("a2"));
+			checkThat(la.nextString(), equalTo("a2"));
+			checkThat(la.hasNext(), equalTo(true));
+			checkThat(la.nextName(), equalTo("s1"));
+			checkThat(la.peek(), equalTo(JsonToken.BEGIN_OBJECT));
 			la.skipValue();
-			assertThat(la.hasNext(), equalTo(true));
-			assertThat(la.nextName(), equalTo("a3"));
-			assertThat(la.nextString(), equalTo("a3"));
+			checkThat(la.hasNext(), equalTo(true));
+			checkThat(la.nextName(), equalTo("a3"));
+			checkThat(la.nextString(), equalTo("a3"));
 			la.endObject();
 			
 			la.close();
 		}
 
 		// Go on
-		assertThat(jr.hasNext(), equalTo(true));
-		assertThat(jr.nextName(), equalTo("a2"));
-		assertThat(jr.nextString(), equalTo("a2"));
+		checkThat(jr.hasNext(), equalTo(true));
+		checkThat(jr.nextName(), equalTo("a2"));
+		checkThat(jr.nextString(), equalTo("a2"));
 	}
 
 }

@@ -3,7 +3,9 @@ package net.etalia.jalia;
 import java.io.IOException;
 import java.io.Writer;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,6 +35,10 @@ public class NativeJsonDeSer implements JsonDeSer {
 	
 	private final static Logger LOG = Logger.getLogger(NativeJsonDeSer.class.getName());
 
+	private static final String
+		ISO_FORMAT_1 = "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+		ISO_FORMAT_2 = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
+
 	@Override
 	public int handlesSerialization(JsonContext context, Class<?> clazz) {
 		if (clazz == null) return 10;
@@ -43,6 +49,7 @@ public class NativeJsonDeSer implements JsonDeSer {
 		if (CharSequence.class.isAssignableFrom(clazz)) return 10;
 		if (Enum.class.isAssignableFrom(clazz)) return 10;
 		if (Class.class.isAssignableFrom(clazz)) return 10;
+		if (UUID.class.isAssignableFrom(clazz)) return 10;
 		return -1;
 	}
 	
@@ -85,7 +92,9 @@ public class NativeJsonDeSer implements JsonDeSer {
 		} else if (obj instanceof Enum) {
 			output.value(((Enum)obj).name());
 		} else if (obj instanceof Class) {
-			output.value(((Class)obj).getName());
+			output.value(((Class) obj).getName());
+		} else if (obj instanceof UUID) {
+			output.value(((UUID)obj).toString());
 		} else {
 			throw new IllegalStateException("Cannot serialize " + obj + " at " + context.getStateLog());
 		}
@@ -131,10 +140,12 @@ public class NativeJsonDeSer implements JsonDeSer {
 					ret = hint.getEnumValue((String)ret);
 				} else if (hint.hasConcrete() && Class.class.isAssignableFrom(hint.getConcrete())) {
 					try {
-						ret = Class.forName((String)ret);
+						ret = Class.forName((String) ret);
 					} catch (ClassNotFoundException e) {
-						throw new IllegalStateException("Cannot deserialize a class " + ret  + " at " + context.getStateLog(), e);
+						throw new IllegalStateException("Cannot deserialize a class " + ret + " at " + context.getStateLog(), e);
 					}
+				} else if (hint.hasConcrete() && UUID.class.isAssignableFrom(hint.getConcrete())) {
+					ret = UUID.fromString((String)ret);
 				} else if (!hint.isCharSequence()) {
 					if (hint.isNumber() || hint.isBoolean()) {
 						if (((String)ret).length() == 0) {
@@ -171,9 +182,16 @@ public class NativeJsonDeSer implements JsonDeSer {
 							ret = null;
 						} else {
 							Date d = null;
-							if (dateStr.indexOf('-') != -1) {
+							if (dateStr.indexOf('-') != -1 ) {
 								try {
 									d = javax.xml.bind.DatatypeConverter.parseDateTime(dateStr).getTime();
+								} catch (Exception ignored) {
+								}
+							}
+							if (dateStr.indexOf('T') != -1 ) {
+								try {
+									d = new SimpleDateFormat(ISO_FORMAT_1).parse(dateStr);
+									d = new SimpleDateFormat(ISO_FORMAT_2).parse(dateStr);
 								} catch (Exception ignored) {
 								}
 							}

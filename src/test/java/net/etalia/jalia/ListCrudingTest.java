@@ -10,7 +10,7 @@ import net.etalia.jalia.DummyAddress.AddressType;
 
 import org.junit.Test;
 
-public class ListCrudingTest {
+public class ListCrudingTest extends TestBase {
 
 	@Test
 	public void test() {
@@ -54,21 +54,20 @@ public class ListCrudingTest {
 				"";
 
 		DummyPerson nmp = om.readValue(listCrudding.replace('\'', '"'), DummyPerson.class);
-		assertThat(nmp, sameInstance(mainp));
+		checkThat(nmp, sameInstance(mainp));
 		
 		System.out.println(om.writeValueAsString(nmp, OutField.getRoot("friends")));
 		
-		assertThat(mainp.getFriends(), hasSize(3));
-		assertThat(mainp.getFriends().get(0).getIdentifier(), equalTo("f3"));
-		assertThat(mainp.getFriends().get(0).getName(), equalTo("Fr3"));
-		assertThat(mainp.getFriends().get(1).getIdentifier(), equalTo("f1"));
-		assertThat(mainp.getFriends().get(1).getName(), equalTo("Friend"));
-		assertThat(mainp.getFriends().get(2).getIdentifier(), nullValue());
-		assertThat(mainp.getFriends().get(2).getName(), equalTo("New"));
-		assertThat(mainp.getFriends().get(2).getSurname(), equalTo("Justmet"));
-		
+		checkThat(mainp.getFriends(), hasSize(3));
+		checkThat(mainp.getFriends().get(0).getIdentifier(), equalTo("f3"));
+		checkThat(mainp.getFriends().get(0).getName(), equalTo("Fr3"));
+		checkThat(mainp.getFriends().get(1).getIdentifier(), equalTo("f1"));
+		checkThat(mainp.getFriends().get(1).getName(), equalTo("Friend"));
+		checkThat(mainp.getFriends().get(2).getIdentifier(), nullValue());
+		checkThat(mainp.getFriends().get(2).getName(), equalTo("New"));
+		checkThat(mainp.getFriends().get(2).getSurname(), equalTo("Justmet"));
 	}
-	
+
 	@Test
 	public void notOnRootOrSubBeans() throws Exception {
 		DummyPerson df = new DummyPerson("p2", "Edmondo","Amicis");
@@ -93,9 +92,9 @@ public class ListCrudingTest {
 				"";
 		
 		DummyPerson readp = om.readValue(update.replace('\'', '"'), dp, DummyPerson.class);
-		assertThat(readp, sameInstance(dp));
-		assertThat(readp.getBestFriend(), sameInstance(df));
-		assertThat(readp.getIdentifier(), equalTo("p1"));
-		assertThat(readp.getBestFriend().getIdentifier(), equalTo("p2"));
+		checkThat(readp, sameInstance(dp));
+		checkThat(readp.getBestFriend(), sameInstance(df));
+		checkThat(readp.getIdentifier(), equalTo("p1"));
+		checkThat(readp.getBestFriend().getIdentifier(), equalTo("p2"));
 	}
 }

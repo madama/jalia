@@ -447,4 +447,17 @@ public class JsonContext extends HashMap<String, Object>{
 		return stateLog;
 	}
 
+	public JsonContext subForInput(JsonReader newInput) {
+		JsonContext ret = new JsonContext(this.mapper);
+		ret.currentFields = this.currentFields;
+		ret.deserCount = this.deserCount;
+		ret.inheritStack.addAll(this.inheritStack);
+		ret.input = newInput;
+		ret.localStack.addAll(this.localStack);
+		ret.namesStack.addAll(this.namesStack);
+		ret.output = this.output;
+		ret.rootFields = this.rootFields;
+		return ret;
+	}
+
 }

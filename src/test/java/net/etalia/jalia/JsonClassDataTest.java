@@ -18,27 +18,27 @@ import net.etalia.jalia.DummyAddress.AddressType;
 import org.junit.Before;
 import org.junit.Test;
 
-public class JsonClassDataTest {
+public class JsonClassDataTest extends TestBase {
 
 	@Test
 	public void gettables() throws Exception {
 		JsonClassDataFactory factory = new JsonClassDataFactoryImpl();
 		
 		JsonClassData jcd = factory.getClassData(DummyPerson.class, null);
-		assertThat(jcd, notNullValue());
+		checkThat(jcd, notNullValue());
 		
 		JsonClassData jcd2 = factory.getClassData(DummyPerson.class, null);
-		assertThat(jcd2, sameInstance(jcd));
+		checkThat(jcd2, sameInstance(jcd));
 		
-		assertThat(jcd.getGettables(), notNullValue());
+		checkThat(jcd.getGettables(), notNullValue());
 		System.out.println(jcd.getGettables());
 		
-		assertThat(jcd.getGettables(), hasItem("name"));
-		assertThat(jcd.getGettables(), hasItem("surname"));
-		assertThat(jcd.getGettables(), hasItem("addresses"));
-		assertThat(jcd.getGettables(), hasItem("identifier"));
-		assertThat(jcd.getGettables(), not(hasItem("class")));
-		assertThat(jcd.getGettables(), not(hasItem("password")));
+		checkThat(jcd.getGettables(), hasItem("name"));
+		checkThat(jcd.getGettables(), hasItem("surname"));
+		checkThat(jcd.getGettables(), hasItem("addresses"));
+		checkThat(jcd.getGettables(), hasItem("identifier"));
+		checkThat(jcd.getGettables(), not(hasItem("class")));
+		checkThat(jcd.getGettables(), not(hasItem("password")));
 	}
 	
 	@Test
@@ -54,8 +54,8 @@ public class JsonClassDataTest {
 		DummyAddress address = new DummyAddress(null, AddressType.EMAIL, "simoneg@apache.org");
 		person.getAddresses().add(address);
 		
-		assertThat((String)jcd.getValue("name", person), equalTo("Simone"));
-		assertThat((String)jcd.getValue("surname", person), equalTo("Gianni"));
+		checkThat((String)jcd.getValue("name", person), equalTo("Simone"));
+		checkThat((String)jcd.getValue("surname", person), equalTo("Gianni"));
 	}
 	
 	@Test
@@ -67,16 +67,16 @@ public class JsonClassDataTest {
 		JsonContext ctx = new JsonContext(mapper);
 		
 		JsonClassData jcd = mapper.getClassDataFactory().getClassData(DummyPerson.class, ctx);
-		assertThat(jcd, notNullValue());
+		checkThat(jcd, notNullValue());
 		
-		assertThat(jcd.getGettables(), notNullValue());
+		checkThat(jcd.getGettables(), notNullValue());
 		System.out.println(jcd.getGettables());
 		
-		assertThat(jcd.getGettables(), hasItem("name"));
-		assertThat(jcd.getGettables(), hasItem("surname"));
-		assertThat(jcd.getGettables(), hasItem("addresses"));
-		assertThat(jcd.getGettables(), not(hasItem("class")));
-		assertThat(jcd.getGettables(), not(hasItem("identifier")));
+		checkThat(jcd.getGettables(), hasItem("name"));
+		checkThat(jcd.getGettables(), hasItem("surname"));
+		checkThat(jcd.getGettables(), hasItem("addresses"));
+		checkThat(jcd.getGettables(), not(hasItem("class")));
+		checkThat(jcd.getGettables(), not(hasItem("identifier")));
 	}
 	
 	@Test
@@ -88,7 +88,7 @@ public class JsonClassDataTest {
 		DummyPerson person = new DummyPerson();
 		jcd.setValue("name", "Simone", person);
 		
-		assertThat(person.getName(), equalTo("Simone"));
+		checkThat(person.getName(), equalTo("Simone"));
 	}
 
 	@Test
@@ -98,22 +98,22 @@ public class JsonClassDataTest {
 		{
 			JsonClassData jcd = factory.getClassData(DummyAnnotations.class, null);
 			
-			assertThat(jcd.getGettables(), containsInAnyOrder("both","getOnly","getOnlyByGetter","unusual","alternative","objBoolean","natBoolean","inclAlways","inclNotNull","inclNotEmpty"));
-			assertThat(jcd.getSettables(), containsInAnyOrder("both","setOnly","setOnlyBySetter","unusual","alternative","objBoolean","natBoolean","inclAlways","inclNotNull","inclNotEmpty"));
-			assertThat(jcd.getDefaults(), containsInAnyOrder("both"));
+			checkThat(jcd.getGettables(), containsInAnyOrder("both","getOnly","getOnlyByGetter","unusual","alternative","objBoolean","natBoolean","inclAlways","inclNotNull","inclNotEmpty"));
+			checkThat(jcd.getSettables(), containsInAnyOrder("both","setOnly","setOnlyBySetter","unusual","alternative","objBoolean","natBoolean","inclAlways","inclNotNull","inclNotEmpty"));
+			checkThat(jcd.getDefaults(), containsInAnyOrder("both"));
 			
-			assertThat(jcd.getSetHint("alternative").getConcrete(), equalTo((Class)Integer.TYPE));
+			checkThat(jcd.getSetHint("alternative").getConcrete(), equalTo((Class)Integer.TYPE));
 			
-			assertThat(jcd.getOptions("both"), nullValue());
-			assertThat(jcd.getOptions("inclAlways"), hasEntry(DefaultOptions.INCLUDE_NULLS.toString(), (Object)true));
-			assertThat(jcd.getOptions("inclAlways"), hasEntry(DefaultOptions.INCLUDE_EMPTY.toString(), (Object)true));
+			checkThat(jcd.getOptions("both"), nullValue());
+			checkThat(jcd.getOptions("inclAlways"), hasEntry(DefaultOptions.INCLUDE_NULLS.toString(), (Object)true));
+			checkThat(jcd.getOptions("inclAlways"), hasEntry(DefaultOptions.INCLUDE_EMPTY.toString(), (Object)true));
 		}		
 		{
 			JsonClassData jcd = factory.getClassData(DummyClassAnnotations.class, null);
 			
-			assertThat(jcd.getGettables(), containsInAnyOrder("both","getOnly","getOnlyByGetter","unusual","alternative","objBoolean","natBoolean","inclAlways","inclNotNull","inclNotEmpty"));
-			assertThat(jcd.getOptions("both"), hasEntry(DefaultOptions.INCLUDE_NULLS.toString(), (Object)true));
-			assertThat(jcd.getOptions("both"), hasEntry(DefaultOptions.INCLUDE_EMPTY.toString(), (Object)true));
+			checkThat(jcd.getGettables(), containsInAnyOrder("both","getOnly","getOnlyByGetter","unusual","alternative","objBoolean","natBoolean","inclAlways","inclNotNull","inclNotEmpty"));
+			checkThat(jcd.getOptions("both"), hasEntry(DefaultOptions.INCLUDE_NULLS.toString(), (Object)true));
+			checkThat(jcd.getOptions("both"), hasEntry(DefaultOptions.INCLUDE_EMPTY.toString(), (Object)true));
 		}		
 		
 	}

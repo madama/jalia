@@ -24,7 +24,7 @@ import net.etalia.jalia.DummyAddress.AddressType;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ObjectMapperDeserializeTest {
+public class ObjectMapperDeserializeTest extends TestBase {
 
 	private String replaceQuote(String json) {
 		return json.replace("'", "\"");
@@ -39,21 +39,21 @@ public class ObjectMapperDeserializeTest {
 		mapper.init();
 		
 		Object ret = mapper.readValue(json);
-		assertThat(ret, notNullValue());
-		assertThat(ret, instanceOf(Map.class));
+		checkThat(ret, notNullValue());
+		checkThat(ret, instanceOf(Map.class));
 		
 		Map<String,Object> map = (Map<String, Object>) ret;
-		assertThat(map, hasEntry("testString", (Object)"string"));
-		assertThat(map, hasEntry("testInt", (Object)1));
-		assertThat(map, hasEntry("testBoolean", (Object)true));
-		assertThat(map, hasEntry("testLong", (Object)(new Long(-62075462400000l))));
+		checkThat(map, hasEntry("testString", (Object)"string"));
+		checkThat(map, hasEntry("testInt", (Object)1));
+		checkThat(map, hasEntry("testBoolean", (Object)true));
+		checkThat(map, hasEntry("testLong", (Object)(new Long(-62075462400000l))));
 		
 		Object subMapObj = map.get("subMap");
-		assertThat(subMapObj, notNullValue());
-		assertThat(subMapObj, instanceOf(Map.class));
+		checkThat(subMapObj, notNullValue());
+		checkThat(subMapObj, instanceOf(Map.class));
 		
 		Map<String,String> subMap = (Map<String, String>) subMapObj;
-		assertThat(subMap, hasEntry("subString", "subString"));
+		checkThat(subMap, hasEntry("subString", "subString"));
 		
 	}
 	
@@ -66,12 +66,12 @@ public class ObjectMapperDeserializeTest {
 		mapper.init();
 		
 		Object ret = mapper.readValue(json, new TypeUtil.Specific<Map<String,Integer>>() {}.type());
-		assertThat(ret, notNullValue());
-		assertThat(ret, instanceOf(Map.class));
+		checkThat(ret, notNullValue());
+		checkThat(ret, instanceOf(Map.class));
 		
 		Map<String,Integer> map = (Map<String, Integer>) ret;
-		assertThat(map, hasEntry("a1", 1));
-		assertThat(map, hasEntry("a2", 2));
+		checkThat(map, hasEntry("a1", 1));
+		checkThat(map, hasEntry("a2", 2));
 	}
 	
 	@Test(expected=JaliaException.class)
@@ -94,11 +94,11 @@ public class ObjectMapperDeserializeTest {
 		mapper.init();
 		
 		Object ret = mapper.readValue(json);
-		assertThat(ret, notNullValue());
-		assertThat(ret, instanceOf(List.class));
+		checkThat(ret, notNullValue());
+		checkThat(ret, instanceOf(List.class));
 		
 		List<Object> list = (List<Object>) ret;
-		assertThat(list, contains((Object)1l, (Object)1.0d, "a2", true));
+		checkThat(list, contains((Object)1l, (Object)1.0d, "a2", true));
 	}
 
 	@Test
@@ -110,11 +110,11 @@ public class ObjectMapperDeserializeTest {
 		mapper.init();
 		
 		Object ret = mapper.readValue(json, new TypeUtil.Specific<List<Integer>>() {}.type());
-		assertThat(ret, notNullValue());
-		assertThat(ret, instanceOf(List.class));
+		checkThat(ret, notNullValue());
+		checkThat(ret, instanceOf(List.class));
 		
 		List<Integer> list = (List<Integer>) ret;
-		assertThat(list, contains(1,2,3));
+		checkThat(list, contains(1,2,3));
 	}
 	
 	@Test(expected=JaliaException.class)
@@ -137,12 +137,12 @@ public class ObjectMapperDeserializeTest {
 		mapper.init();
 		
 		Object ret = mapper.readValue(json, new TypeUtil.Specific<LinkedList<Integer>>() {}.type());
-		assertThat(ret, notNullValue());
-		assertThat(ret, instanceOf(List.class));
-		assertThat(ret, instanceOf(LinkedList.class));
+		checkThat(ret, notNullValue());
+		checkThat(ret, instanceOf(List.class));
+		checkThat(ret, instanceOf(LinkedList.class));
 		
 		List<Integer> list = (List<Integer>) ret;
-		assertThat(list, contains(1,2,3));
+		checkThat(list, contains(1,2,3));
 	}
 	
 	@Test
@@ -154,13 +154,13 @@ public class ObjectMapperDeserializeTest {
 		mapper.init();
 		
 		Object ret = mapper.readValue(json, new TypeUtil.Specific<int[]>() {}.type());
-		assertThat(ret, notNullValue());
-		assertThat(ret.getClass().isArray(), equalTo(true));
+		checkThat(ret, notNullValue());
+		checkThat(ret.getClass().isArray(), equalTo(true));
 		
 		int[] list = (int[]) ret;
-		assertThat(list[0], equalTo(1));
-		assertThat(list[1], equalTo(2));
-		assertThat(list[2], equalTo(3));
+		checkThat(list[0], equalTo(1));
+		checkThat(list[1], equalTo(2));
+		checkThat(list[2], equalTo(3));
 	}
 	
 	
@@ -192,27 +192,27 @@ public class ObjectMapperDeserializeTest {
 		om.init();
 		Object val = om.readValue(json.replace("'", "\""));
 		
-		assertThat(val, notNullValue());
-		assertThat(val, instanceOf(DummyPerson.class));
+		checkThat(val, notNullValue());
+		checkThat(val, instanceOf(DummyPerson.class));
 		
 		DummyPerson person = (DummyPerson) val;
-		assertThat(person.getName(), equalTo("Mario"));
-		assertThat(person.getSurname(), equalTo("Rossi"));
-		assertThat(person.getAge(), equalTo(21));
-		assertThat(person.getHeight(), equalTo(5.2f));
-		assertThat(person.getActive(), equalTo(true));
-		assertThat(person.getBirthDay(), notNullValue());
-		assertThat(person.getBirthDay().getTime(), equalTo(1000l));
+		checkThat(person.getName(), equalTo("Mario"));
+		checkThat(person.getSurname(), equalTo("Rossi"));
+		checkThat(person.getAge(), equalTo(21));
+		checkThat(person.getHeight(), equalTo(5.2f));
+		checkThat(person.getActive(), equalTo(true));
+		checkThat(person.getBirthDay(), notNullValue());
+		checkThat(person.getBirthDay().getTime(), equalTo(1000l));
 		
-		assertThat(person.getAddresses(), hasSize(1));
-		assertThat(person.getAddresses().get(0), notNullValue());
-		assertThat(person.getAddresses().get(0), instanceOf(DummyAddress.class));
+		checkThat(person.getAddresses(), hasSize(1));
+		checkThat(person.getAddresses().get(0), notNullValue());
+		checkThat(person.getAddresses().get(0), instanceOf(DummyAddress.class));
 		
-		assertThat(person.getAddresses().get(0).getType(), equalTo(AddressType.EMAIL));
-		assertThat(person.getAddresses().get(0).getAddress(), equalTo("m.rossi@gmail.com"));
+		checkThat(person.getAddresses().get(0).getType(), equalTo(AddressType.EMAIL));
+		checkThat(person.getAddresses().get(0).getAddress(), equalTo("m.rossi@gmail.com"));
 		
-		assertThat(person.getTags(), hasSize(2));
-		assertThat(person.getTags(), containsInAnyOrder("tag1","tag2"));
+		checkThat(person.getTags(), hasSize(2));
+		checkThat(person.getTags(), containsInAnyOrder("tag1","tag2"));
 	}
 
 	@Test
@@ -232,16 +232,16 @@ public class ObjectMapperDeserializeTest {
 		om.init();
 		Object val = om.readValue(json.replace("'", "\""));
 		
-		assertThat(val, notNullValue());
-		assertThat(val, instanceOf(DummyPerson.class));
+		checkThat(val, notNullValue());
+		checkThat(val, instanceOf(DummyPerson.class));
 		
 		DummyPerson person = (DummyPerson) val;
-		assertThat(person.getName(), equalTo("Mario"));
-		assertThat(person.getSurname(), equalTo("Rossi"));
-		assertThat(person.getAge(), equalTo(21));
-		assertThat(person.getActive(), equalTo(true));
-		assertThat(person.getBirthDay(), notNullValue());
-		assertThat(person.getBirthDay().getTime(), equalTo(1000l));
+		checkThat(person.getName(), equalTo("Mario"));
+		checkThat(person.getSurname(), equalTo("Rossi"));
+		checkThat(person.getAge(), equalTo(21));
+		checkThat(person.getActive(), equalTo(true));
+		checkThat(person.getBirthDay(), notNullValue());
+		checkThat(person.getBirthDay().getTime(), equalTo(1000l));
 	}
 
 	@Test
@@ -261,15 +261,15 @@ public class ObjectMapperDeserializeTest {
 		om.init();
 		Object val = om.readValue(json.replace("'", "\""));
 		
-		assertThat(val, notNullValue());
-		assertThat(val, instanceOf(DummyPerson.class));
+		checkThat(val, notNullValue());
+		checkThat(val, instanceOf(DummyPerson.class));
 		
 		DummyPerson person = (DummyPerson) val;
-		assertThat(person.getName(), equalTo("Mario"));
-		assertThat(person.getSurname(), equalTo("Rossi"));
-		assertThat(person.getAge(), equalTo(null));
-		assertThat(person.getActive(), equalTo(null));
-		assertThat(person.getBirthDay(), nullValue());
+		checkThat(person.getName(), equalTo("Mario"));
+		checkThat(person.getSurname(), equalTo("Rossi"));
+		checkThat(person.getAge(), equalTo(null));
+		checkThat(person.getActive(), equalTo(null));
+		checkThat(person.getBirthDay(), nullValue());
 	}
 	
 	@Test
@@ -285,11 +285,11 @@ public class ObjectMapperDeserializeTest {
 		om.init();
 		Object val = om.readValue(json.replace("'", "\""));
 		
-		assertThat(val, notNullValue());
-		assertThat(val, instanceOf(DummyPerson.class));
+		checkThat(val, notNullValue());
+		checkThat(val, instanceOf(DummyPerson.class));
 		
 		DummyPerson person = (DummyPerson) val;
-		assertThat(person.getBirthDay().getTime(), equalTo(289467082000l));
+		checkThat(person.getBirthDay().getTime(), equalTo(289467082000l));
 	}
 	@Test
 	public void entityFromExisting() throws Exception {
@@ -314,19 +314,19 @@ public class ObjectMapperDeserializeTest {
 		om.init();
 		Object val = om.readValue(json.replace("'", "\""));
 		
-		assertThat(val, notNullValue());
-		assertThat(val, instanceOf(DummyPerson.class));
+		checkThat(val, notNullValue());
+		checkThat(val, instanceOf(DummyPerson.class));
 		
 		DummyPerson person = (DummyPerson) val;
-		assertThat(person.getName(), equalTo("Simone"));
-		assertThat(person.getSurname(), equalTo("Gianni"));
+		checkThat(person.getName(), equalTo("Simone"));
+		checkThat(person.getSurname(), equalTo("Gianni"));
 		
-		assertThat(person.getAddresses(), hasSize(1));
-		assertThat(person.getAddresses().get(0), notNullValue());
-		assertThat(person.getAddresses().get(0), instanceOf(DummyAddress.class));
+		checkThat(person.getAddresses(), hasSize(1));
+		checkThat(person.getAddresses().get(0), notNullValue());
+		checkThat(person.getAddresses().get(0), instanceOf(DummyAddress.class));
 		
-		assertThat(person.getAddresses().get(0).getType(), equalTo(AddressType.EMAIL));
-		assertThat(person.getAddresses().get(0).getAddress(), equalTo("m.rossi@gmail.com"));
+		checkThat(person.getAddresses().get(0).getType(), equalTo(AddressType.EMAIL));
+		checkThat(person.getAddresses().get(0).getAddress(), equalTo("m.rossi@gmail.com"));
 	}
 	
 	@Test(expected=JaliaException.class)
@@ -439,13 +439,13 @@ public class ObjectMapperDeserializeTest {
 		Object rpersonObj = om.readValue(json.replace("'", "\""));
 		DummyPerson rperson = (DummyPerson) rpersonObj;
 		
-		assertThat(rperson, sameInstance(person));
-		assertThat(rperson.getAddresses(), sameInstance(prelist));
+		checkThat(rperson, sameInstance(person));
+		checkThat(rperson.getAddresses(), sameInstance(prelist));
 		
-		assertThat(prelist, hasSize(3));
-		assertThat(prelist.get(0).getIdentifier(), equalTo("a3"));
-		assertThat(prelist.get(1), sameInstance(a1));
-		assertThat(prelist.get(2), sameInstance(a2));
+		checkThat(prelist, hasSize(3));
+		checkThat(prelist.get(0).getIdentifier(), equalTo("a3"));
+		checkThat(prelist.get(1), sameInstance(a1));
+		checkThat(prelist.get(2), sameInstance(a2));
 	}
 
 	@Test
@@ -477,11 +477,11 @@ public class ObjectMapperDeserializeTest {
 		Object rpersonObj = om.readValue(json.replace("'", "\""));
 		DummyPerson rperson = (DummyPerson) rpersonObj;
 		
-		assertThat(rperson, sameInstance(person));
-		assertThat(rperson.getTags(), sameInstance(preset));
+		checkThat(rperson, sameInstance(person));
+		checkThat(rperson.getTags(), sameInstance(preset));
 		
-		assertThat(preset, hasSize(3));
-		assertThat(preset, containsInAnyOrder("tag1","tag2","tag3"));
+		checkThat(preset, hasSize(3));
+		checkThat(preset, containsInAnyOrder("tag1","tag2","tag3"));
 	}
 	
 	@Test
@@ -524,14 +524,14 @@ public class ObjectMapperDeserializeTest {
 		Object rpersonObj = om.readValue(json.replace("'", "\""));
 		DummyPerson rperson = (DummyPerson) rpersonObj;
 		
-		assertThat(rperson, sameInstance(person));
-		assertThat(rperson.getAddresses(), sameInstance(prelist));
+		checkThat(rperson, sameInstance(person));
+		checkThat(rperson.getAddresses(), sameInstance(prelist));
 		
 		System.out.println(rperson);
 		
-		assertThat(prelist, hasSize(2));
-		assertThat(prelist.get(0).getIdentifier(), equalTo("a4"));
-		assertThat(prelist.get(1), sameInstance(a1));
+		checkThat(prelist, hasSize(2));
+		checkThat(prelist.get(0).getIdentifier(), equalTo("a4"));
+		checkThat(prelist.get(1), sameInstance(a1));
 	}
 
 	@Test
@@ -562,11 +562,11 @@ public class ObjectMapperDeserializeTest {
 		Object rpersonObj = om.readValue(json.replace("'", "\""));
 		DummyPerson rperson = (DummyPerson) rpersonObj;
 		
-		assertThat(rperson, sameInstance(person));
-		assertThat(rperson.getTags(), sameInstance(preset));
+		checkThat(rperson, sameInstance(person));
+		checkThat(rperson.getTags(), sameInstance(preset));
 		
-		assertThat(preset, hasSize(2));
-		assertThat(preset, containsInAnyOrder("tag1","tag4"));
+		checkThat(preset, hasSize(2));
+		checkThat(preset, containsInAnyOrder("tag1","tag4"));
 	}
 	
 	@Test
@@ -596,11 +596,11 @@ public class ObjectMapperDeserializeTest {
 		Object rpersonObj = om.readValue(json.replace("'", "\""));
 		DummyPerson rperson = (DummyPerson) rpersonObj;
 		List<DummyAddress> prelist = rperson.getAddresses();
-		assertThat(prelist, hasSize(2));
-		assertThat(prelist.get(0).getIdentifier(), equalTo("a1"));
-		assertThat(prelist.get(0), sameInstance(a1));
-		assertThat(prelist.get(1).getIdentifier(), equalTo("a2"));
-		assertThat(prelist.get(1), sameInstance(a2));
+		checkThat(prelist, hasSize(2));
+		checkThat(prelist.get(0).getIdentifier(), equalTo("a1"));
+		checkThat(prelist.get(0), sameInstance(a1));
+		checkThat(prelist.get(1).getIdentifier(), equalTo("a2"));
+		checkThat(prelist.get(1), sameInstance(a2));
 	}
 	
 	@Test
@@ -626,8 +626,32 @@ public class ObjectMapperDeserializeTest {
 		
 		Object rpersonObj = om.readValue(json.replace("'", "\""));
 		DummyPerson rperson = (DummyPerson) rpersonObj;
-		assertThat(rperson.getExtraData(), hasEntry("extra1", (Object)"extra"));
-		assertThat(rperson.getSecrets(), contains("s1","s2"));
+		checkThat(rperson.getExtraData(), hasEntry("extra1", (Object)"extra"));
+		checkThat(rperson.getSecrets(), contains("s1","s2"));
+	}
+
+	@Test(expected = JaliaException.class)
+	public void cannotChangeMainAddressWithUnfoundOne() throws Exception {
+		ObjectMapper om = new ObjectMapper();
+		String json =
+				"{" +
+						"'@entity':'Person'," +
+						"'mainAddress':null" +
+						"}";
+		om.readValue(json.replace("'", "\""), DummyPerson.class);
+
+
+		String json2 =
+				"{" +
+						"'@entity':'Person'," +
+						"'mainAddress':" +
+						"{" +
+						"'type':'EMAIL'," +
+						"'address':'a@b.com'" +
+						"}"+
+						"}";
+
+		om.readValue(json2.replace("'", "\""), DummyPerson.class);
 	}
 
 	@Test
@@ -658,7 +682,7 @@ public class ObjectMapperDeserializeTest {
 			
 			Object rpersonObj = om.readValue(json.replace("'", "\""));
 			DummyPerson rperson = (DummyPerson) rpersonObj;
-			assertThat(rperson.getBestFriend(), notNullValue());
+			checkThat(rperson.getBestFriend(), notNullValue());
 		}
 		{
 			String json = 
@@ -670,7 +694,7 @@ public class ObjectMapperDeserializeTest {
 			
 			Object rpersonObj = om.readValue(json.replace("'", "\""));
 			DummyPerson rperson = (DummyPerson) rpersonObj;
-			assertThat(rperson.getBestFriend(), nullValue());
+			checkThat(rperson.getBestFriend(), nullValue());
 		}
 	}
 
@@ -678,18 +702,20 @@ public class ObjectMapperDeserializeTest {
 	public void invalidNativeDeserializations() throws Exception {
 		ObjectMapper om = new ObjectMapper();
 		
-		assertThat(om.readValue("test of string { with \"stuff\" [] }", String.class), equalTo("test of string { with \"stuff\" [] }"));
-		assertThat(om.readValue("1", Long.class), equalTo(1l));
-		assertThat(om.readValue("1.0", Double.class), equalTo(1.0d));
-		assertThat(om.readValue("true", Boolean.class), equalTo(true));
-		assertThat(om.readValue("null", Boolean.class), nullValue());
-		assertThat(om.readValue("null", DummyPerson.class), nullValue());
+		checkThat(om.readValue("test of string { with \"stuff\" [] }", String.class), equalTo("test of string { with \"stuff\" [] }"));
+		checkThat(om.readValue("1", Long.class), equalTo(1l));
+		checkThat(om.readValue("1.0", Double.class), equalTo(1.0d));
+		checkThat(om.readValue("true", Boolean.class), equalTo(true));
+		checkThat(om.readValue("null", Boolean.class), nullValue());
+		checkThat(om.readValue("null", DummyPerson.class), nullValue());
 	}
-	
-	
+
 	@Test
 	public void pollutedDeSerCache() throws Exception {
+		DummyEntityProvider ep = new DummyEntityProvider();
+		ep.addToDb(new DummyAddress("a4", AddressType.EMAIL, "a@b.com"));
 		ObjectMapper om = new ObjectMapper();
+		om.setEntityFactory(ep);
 		String json = 
 				"{" +
 						"'@entity':'Person'," +

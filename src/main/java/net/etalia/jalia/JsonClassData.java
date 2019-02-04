@@ -320,6 +320,9 @@ public class JsonClassData {
 			opts.put(MapJsonDeSer.DROP, ann.drop());
 			opts.put(MapJsonDeSer.CLEAR, ann.clear());
 		}
+		if (ele.isAnnotationPresent(JsonAllowNewEntities.class)) {
+			opts.put(BeanJsonDeSer.ALLOW_NEW, true);
+		}
 	}
 
 	/**
@@ -333,6 +336,14 @@ public class JsonClassData {
 		method.setAccessible(true);
 		String name = methodName(method, ignore);
 		String baseName = name.startsWith("!") ? name.substring(1) : name;
+		Map<String,Object> opts = this.options.get(baseName);
+		if (opts == null) opts = new HashMap<String, Object>();
+		parseOptions(method, opts);
+		if (!opts.isEmpty()) {
+			this.options.put(baseName, opts);
+		} else {
+			this.options.put(baseName, null);
+		}
 		if (name.startsWith("!")) {
 			allSetters.put(baseName, method);
 			// Check if to remove also the setter

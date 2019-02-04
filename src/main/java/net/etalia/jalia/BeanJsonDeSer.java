@@ -13,8 +13,11 @@ import net.etalia.jalia.stream.JsonWriter;
 public class BeanJsonDeSer implements JsonDeSer {
 
 	public static final String REUSE_WITHOUT_ID = "BEAN_JSON_DESER_REUSEWITHOUTID";
+	public static final String ALLOW_NEW = "BEAN_JSON_DESER_ALLOWNEW";
 	private static final String CTX_BEAN_JSON_DE_SER_DONES = "BeanJsonDeSer_Dones";
 	private static final String CTX_BEAN_JSON_DE_SER_SENTS = "BeanJsonDeSer_Sents";
+
+	private JsonDeSer idDeser = new NativeJsonDeSer();
 
 	@Override
 	public int handlesSerialization(JsonContext context, Class<?> clazz) {
@@ -66,12 +69,12 @@ public class BeanJsonDeSer implements JsonDeSer {
 				return;
 			}			
 			
-			String id = factory.getId(obj, context);
+			Object id = factory.getId(obj, context);
 			if (id != null) {
 				// Prevent loops in serialization
 				if (context.hasInLocalStack(CTX_ALL_SERIALIZESTACK, obj)) {
 					if (!context.getFromStackBoolean(DefaultOptions.UNROLL_OBJECTS.toString()) || context.isSerializingAll()) {
-						output.value(id);
+						idDeser.serialize(id, context);
 						return;
 					}
 				}
@@ -82,21 +85,21 @@ public class BeanJsonDeSer implements JsonDeSer {
 					sents = new HashMap<>();
 					context.put(CTX_BEAN_JSON_DE_SER_SENTS, sents);
 				}
-				if (sents.containsKey(id) && !context.getFromStackBoolean(DefaultOptions.UNROLL_OBJECTS.toString())) {
-					output.value(id);
+				if (sents.containsKey(id.toString()) && !context.getFromStackBoolean(DefaultOptions.UNROLL_OBJECTS.toString())) {
+					idDeser.serialize(id, context);
 					return;
 				}
-				sents.put(id, obj);
+				sents.put(id.toString(), obj);
 			}
 		}
 
 		if (context.hasInLocalStack(CTX_ALL_SERIALIZESTACK, obj)) {
 			if (!context.getFromStackBoolean(DefaultOptions.UNROLL_OBJECTS.toString()) || context.isSerializingAll()) {
 				// TODO this avoid loops, but also break serialization, cause there is no id to send
-				output.clearName();			
+				output.clearName();
 				return;
 			}
-		}		
+		}
 		
 		context.putLocalStack(CTX_ALL_SERIALIZESTACK, obj);
 		
@@ -114,11 +117,13 @@ public class BeanJsonDeSer implements JsonDeSer {
 			output.name("@entity");
 			output.value(obj.getClass().getSimpleName());
 		}
+		boolean idSent = false;
 		if (factory != null) {
-			String id = factory.getId(obj, context);
+			Object id = factory.getId(obj, context);
 			if (id != null) {
 				output.name("id");
-				output.value(id);
+				idDeser.serialize(id, context);
+				idSent = true;
 			}
 		}
 		JsonClassData cd = context.getMapper().getClassDataFactory().getClassData(obj.getClass(), context);
@@ -138,6 +143,7 @@ public class BeanJsonDeSer implements JsonDeSer {
 		}
 		for (String name : context.getCurrentSubs()) {
 			if (sents.contains(name)) continue;
+			if (idSent && name.equals("id")) continue;
 			if (context.entering(name, cd.getDefaults())) {
 				Object val;
 				val = cd.getValue(name, obj);
@@ -165,7 +171,7 @@ public class BeanJsonDeSer implements JsonDeSer {
 	@Override
 	public Object deserialize(JsonContext context, Object pre, TypeUtil hint) throws IOException {
 		// Search for @entity and id
-		String id = null;
+		Object id = null;
 		String entity = null;
 		boolean embedded = false;
 		
@@ -194,7 +200,7 @@ public class BeanJsonDeSer implements JsonDeSer {
 				if (name.equals("@entity")) {
 					entity = la.nextString();
 				} else if (name.equals("id")) {
-					id = la.nextString();
+					id = idDeser.deserialize(context.subForInput(la), null, null);
 				} else {
 					la.skipValue();
 				}
@@ -225,7 +231,7 @@ public class BeanJsonDeSer implements JsonDeSer {
 		}
 		if (pre != null) {
 			if (factory != null) {
-				String preid = factory.getId(pre, context);
+				Object preid = factory.getId(pre, context);
 				if (preid != null) {
 					if (context.getFromStackBoolean(REUSE_WITHOUT_ID)) {
 						if (id == null || !preid.equals(id)) {
@@ -266,9 +272,11 @@ public class BeanJsonDeSer implements JsonDeSer {
 				pre = null;
 			}
 		}
-		if (pre == null && clazz != null) {
-			// Try to obtain it from factory
-			if (factory != null) {
+		if (pre == null) {
+			if (clazz != null && factory != null) {
+				if (id == null && !context.isRoot() && !context.getFromStackBoolean(ALLOW_NEW)) {
+					throw new IllegalStateException("Cannot create new values here and no id provided");
+				}
 				pre = factory.buildEntity(clazz, id, context);
 			}
 		}
@@ -277,6 +285,9 @@ public class BeanJsonDeSer implements JsonDeSer {
 			return pre;
 		}
 		if (pre == null) {
+			if (!context.isRoot() && !context.getFromStackBoolean(ALLOW_NEW)) {
+				throw new IllegalStateException("Cannot create new values here and factory didn't return any");
+			}
 			// Try to instantiate it
 			pre = TypeUtil.get(clazz).newInstance();
 		}
@@ -293,7 +304,7 @@ public class BeanJsonDeSer implements JsonDeSer {
 				dones = new HashMap<>();
 				context.put(CTX_BEAN_JSON_DE_SER_DONES, dones);
 			}
-			dones.put(id, pre);
+			dones.put(id.toString(), pre);
 		}
 		while (input.hasNext()) {
 			String name = input.nextName();

@@ -11,7 +11,7 @@ import net.etalia.jalia.OutField;
 
 import org.junit.Test;
 
-public class OutFieldTest {
+public class OutFieldTest extends TestBase {
 
 	@Test
 	public void testParse() {
@@ -32,44 +32,44 @@ public class OutFieldTest {
 		}
 		
 		Map<String, OutField> rsubs = root.getSubs();
-		assertThat(rsubs.keySet(), hasSize(3));
-		assertThat(rsubs, hasKey("id"));
-		assertThat(rsubs, hasKey("gallery"));
-		assertThat(rsubs, hasKey("author"));	
+		checkThat(rsubs.keySet(), hasSize(3));
+		checkThat(rsubs, hasKey("id"));
+		checkThat(rsubs, hasKey("gallery"));
+		checkThat(rsubs, hasKey("author"));
 		
 		OutField gitem = rsubs.get("gallery");
 		Map<String, OutField> gsubs = gitem.getSubs();
-		assertThat(gsubs.keySet(), hasSize(2));
-		assertThat(gsubs, hasKey("id"));
-		assertThat(gsubs, hasKey("title"));
+		checkThat(gsubs.keySet(), hasSize(2));
+		checkThat(gsubs, hasKey("id"));
+		checkThat(gsubs, hasKey("title"));
 		
 		OutField aitem = rsubs.get("author");
 		Map<String, OutField> asubs = aitem.getSubs();
-		assertThat(asubs.keySet(), hasSize(2));
-		assertThat(asubs, hasKey("profile"));
-		assertThat(asubs, hasKey("email"));
+		checkThat(asubs.keySet(), hasSize(2));
+		checkThat(asubs, hasKey("profile"));
+		checkThat(asubs, hasKey("email"));
 
 		OutField apitem = asubs.get("profile");
-		assertThat(apitem.getFullPath(), equalTo("author.profile"));
+		checkThat(apitem.getFullPath(), equalTo("author.profile"));
 		Map<String, OutField> apsubs = apitem.getSubs();
-		assertThat(apsubs.keySet(), hasSize(2));
-		assertThat(apsubs, hasKey("id"));
-		assertThat(apsubs, hasKey("picture"));
+		checkThat(apsubs.keySet(), hasSize(2));
+		checkThat(apsubs, hasKey("id"));
+		checkThat(apsubs, hasKey("picture"));
 
 		for (String sub : subs) {
-			assertThat("Not found " + sub, root.getSub(sub), notNullValue());
+			checkThat("Not found " + sub, root.getSub(sub), notNullValue());
 		}
 		
-		assertThat(root.getSub("pippo"), nullValue());		
-		assertThat(root.getSub("pippo.pluto"), nullValue());		
-		assertThat(root.getSub("gallery.pippo"), nullValue());		
+		checkThat(root.getSub("pippo"), nullValue());
+		checkThat(root.getSub("pippo.pluto"), nullValue());
+		checkThat(root.getSub("gallery.pippo"), nullValue());
 		
 		Set<String> stringList = root.toStringList();
 		for (String sub : subs) {
-			assertThat(stringList, hasItem(sub));
+			checkThat(stringList, hasItem(sub));
 		}
 		// There are 3 more subs : gallery, author and author.profile 
-		assertThat(stringList, hasSize(subs.length + 3));
+		checkThat(stringList, hasSize(subs.length + 3));
 	}
 
 	@Test
@@ -78,10 +78,10 @@ public class OutFieldTest {
 		OutField.getGroups().clear();
 		OutField.parseGroupsJson(new StringReader(groupJson));
 
-		assertThat(OutField.getGroups(), hasKey("group"));
+		checkThat(OutField.getGroups(), hasKey("group"));
 		OutField group = OutField.getGroups().get("group");
 		Set<String> stringList = group.toStringList();
-		assertThat(stringList, containsInAnyOrder("prop1", "prop2", "link1", "link1.prop1", "link2"));
+		checkThat(stringList, containsInAnyOrder("prop1", "prop2", "link1", "link1.prop1", "link2"));
 	}
 
 	@Test
@@ -96,10 +96,10 @@ public class OutFieldTest {
 		OutField.getGroups().clear();
 		OutField.parseGroupsJson(new StringReader(groupJson));
 
-		assertThat(OutField.getGroups(), hasKey("group"));
+		checkThat(OutField.getGroups(), hasKey("group"));
 		OutField group = OutField.getGroups().get("group");
 		Set<String> stringList = group.toStringList();
-		assertThat(stringList, containsInAnyOrder("prop1", "prop2", "link1", "link1.prop1", "link2", "link3",
+		checkThat(stringList, containsInAnyOrder("prop1", "prop2", "link1", "link1.prop1", "link2", "link3",
 				"link3.p3", "link3.p4"));
 	}
 
@@ -114,9 +114,9 @@ public class OutFieldTest {
 		OutField.getGroups().clear();
 		OutField.parseGroupsJson(new StringReader(groupJson));
 
-		assertThat(OutField.getGroups(), hasKey("group"));
+		checkThat(OutField.getGroups(), hasKey("group"));
 		OutField group = OutField.getGroups().get("group");
 		Set<String> stringList = group.toStringList();
-		assertThat(stringList, containsInAnyOrder("prop1", "prop2", "link1", "link1.prop1", "link1.prop2", "link2", "link3"));
+		checkThat(stringList, containsInAnyOrder("prop1", "prop2", "link1", "link1.prop1", "link1.prop2", "link2", "link3"));
 	}
 }
