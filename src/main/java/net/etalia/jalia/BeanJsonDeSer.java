@@ -14,6 +14,7 @@ public class BeanJsonDeSer implements JsonDeSer {
 
 	public static final String REUSE_WITHOUT_ID = "BEAN_JSON_DESER_REUSEWITHOUTID";
 	public static final String ALLOW_NEW = "BEAN_JSON_DESER_ALLOWNEW";
+    public static final String ALLOW_CHANGES = "BEAN_JSON_DESER_ALLOWCHANGES";
 	private static final String CTX_BEAN_JSON_DE_SER_DONES = "BeanJsonDeSer_Dones";
 	private static final String CTX_BEAN_JSON_DE_SER_SENTS = "BeanJsonDeSer_Sents";
 
@@ -272,22 +273,31 @@ public class BeanJsonDeSer implements JsonDeSer {
 				pre = null;
 			}
 		}
-		if (pre == null) {
-			if (clazz != null && factory != null) {
-				if (id == null && !context.isRoot() && !context.getFromStackBoolean(ALLOW_NEW)) {
-					throw new IllegalStateException("Cannot create new values here and no id provided");
-				}
-				pre = factory.buildEntity(clazz, id, context);
+		if (pre == null && clazz != null && factory != null) {
+			if (id == null && !context.isRoot() && !context.getFromStackBoolean(ALLOW_NEW)) {
+				throw new IllegalStateException("Cannot create new values here and no id provided");
 			}
+			pre = factory.buildEntity(clazz, id, context);
 		}
 		if (embedded) {
 			if (pre == null) throw new IllegalStateException("Cannot deserialize embedded object " + id + " " + hint);
 			return pre;
 		}
-		if (pre == null) {
-			if (!context.isRoot() && !context.getFromStackBoolean(ALLOW_NEW)) {
-				throw new IllegalStateException("Cannot create new values here and factory didn't return any");
+		// Check if we can proceed modifying existing instance
+		if (pre != null && factory != null && !context.isRoot() && !context.getFromStackBoolean(ALLOW_CHANGES)) {
+			// Not allowed to apply changes, swallow the rest of the json
+			while (input.hasNext()) {
+				input.nextName();
+				input.skipValue();
 			}
+			input.endObject();
+			return pre;
+		}
+		// Check if we can proceed creating a new instance
+        if (pre == null && !context.isRoot() && !context.getFromStackBoolean(ALLOW_NEW)) {
+            throw new IllegalStateException("Cannot create new values here and factory didn't return any");
+        }
+		if (pre == null) {
 			// Try to instantiate it
 			pre = TypeUtil.get(clazz).newInstance();
 		}
@@ -296,7 +306,7 @@ public class BeanJsonDeSer implements JsonDeSer {
 		JsonClassData cd = context.getMapper().getClassDataFactory().getClassData(pre.getClass(), context);
 		if (factory != null) {
 			pre = factory.prepare(pre, false, context);
-		}		
+		}
 		
 		if (id != null) {
 			Map<String,Object> dones = (Map<String, Object>) context.get(CTX_BEAN_JSON_DE_SER_DONES);

@@ -118,8 +118,10 @@ public class MapJsonDeSer implements JsonDeSer {
 		while (input.hasNext()) {
 			String name = input.nextName();
 			boolean wasAllowNew = context.getFromStackBoolean(BeanJsonDeSer.ALLOW_NEW);
+			boolean wasAllowChanges = context.getFromStackBoolean(BeanJsonDeSer.ALLOW_CHANGES);
 			context.deserializationEntering(name);
 			context.putLocalStack(BeanJsonDeSer.ALLOW_NEW, wasAllowNew);
+			context.putLocalStack(BeanJsonDeSer.ALLOW_CHANGES, wasAllowChanges);
 			keys.add(name);
 			Object preval = read.get(name);
 			TypeUtil useHint = inner;

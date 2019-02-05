@@ -320,8 +320,11 @@ public class JsonClassData {
 			opts.put(MapJsonDeSer.DROP, ann.drop());
 			opts.put(MapJsonDeSer.CLEAR, ann.clear());
 		}
-		if (ele.isAnnotationPresent(JsonAllowNewEntities.class)) {
+		if (ele.isAnnotationPresent(JsonAllowNewInstances.class)) {
 			opts.put(BeanJsonDeSer.ALLOW_NEW, true);
+		}
+		if (ele.isAnnotationPresent(JsonAllowEntityPropertyChanges.class)) {
+			opts.put(BeanJsonDeSer.ALLOW_CHANGES, true);
 		}
 	}
 

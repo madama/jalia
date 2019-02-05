@@ -10,10 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.etalia.jalia.annotations.JsonAllowNewEntities;
-import net.etalia.jalia.annotations.JsonRequireIdForReuse;
-import net.etalia.jalia.annotations.JsonOnDemandOnly;
-import net.etalia.jalia.annotations.JsonSetter;
+import net.etalia.jalia.annotations.*;
 
 
 public class DummyPerson extends DummyEntity {
@@ -60,7 +57,7 @@ public class DummyPerson extends DummyEntity {
 		this.surname = surname;
 	}
 
-	@JsonAllowNewEntities
+	@JsonAllowNewInstances
 	public List<DummyAddress> getAddresses() {
 		return addresses;
 	}
@@ -102,7 +99,8 @@ public class DummyPerson extends DummyEntity {
 	}
 	
 	@JsonRequireIdForReuse
-	@JsonAllowNewEntities
+	@JsonAllowNewInstances
+	@JsonAllowEntityPropertyChanges
 	public List<DummyPerson> getFriends() {
 		return friends;
 	}
@@ -140,7 +138,7 @@ public class DummyPerson extends DummyEntity {
 		this.active = active;
 	}
 
-	@JsonAllowNewEntities
+	@JsonAllowNewInstances
 	public DummyPerson getBestFriend() {
 		return bestFriend;
 	}

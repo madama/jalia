@@ -1,12 +1,9 @@
 package net.etalia.jalia;
 
 import static org.hamcrest.Matchers.*;
-import net.etalia.jalia.annotations.JsonAllowNewEntities;
-import org.hamcrest.Matchers;
-import org.junit.Rule;
+import net.etalia.jalia.annotations.JsonAllowNewInstances;
+import net.etalia.jalia.annotations.JsonAllowEntityPropertyChanges;
 import org.junit.Test;
-import org.junit.rules.ErrorCollector;
-import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
@@ -14,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class JsonAllowNewEntitiesTest extends TestBase {
+public class JsonAllowNewInstancesTest extends TestBase {
 
     public static class AllowDeny {
         private String name;
@@ -33,15 +30,17 @@ public class JsonAllowNewEntitiesTest extends TestBase {
             this.name = name;
         }
 
+        @JsonAllowEntityPropertyChanges
         public AllowDeny getAllow() {
             return allow;
         }
 
-        @JsonAllowNewEntities
+        @JsonAllowNewInstances
         public void setAllow(AllowDeny allow) {
             this.allow = allow;
         }
 
+        @JsonAllowEntityPropertyChanges
         public AllowDeny getDeny() {
             return deny;
         }
@@ -50,7 +49,7 @@ public class JsonAllowNewEntitiesTest extends TestBase {
             this.deny = deny;
         }
 
-        @JsonAllowNewEntities
+        @JsonAllowNewInstances
         public List<AllowDeny> getAlloweds() {
             return alloweds;
         }
@@ -59,7 +58,7 @@ public class JsonAllowNewEntitiesTest extends TestBase {
             return denieds;
         }
 
-        @JsonAllowNewEntities
+        @JsonAllowNewInstances
         public Map<String, AllowDeny> getAllowMap() {
             return allowMap;
         }

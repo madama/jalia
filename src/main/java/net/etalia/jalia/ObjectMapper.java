@@ -571,12 +571,12 @@ public class ObjectMapper {
 		return readValue(json, null, (TypeUtil)null);
 	}	
 	public <T> T readValue(byte[] json, T pre) {
-		return readValue(json, pre, (TypeUtil)null);
+		return readValue(json, pre, pre == null ? null : TypeUtil.get(pre.getClass()));
 	}	
 	public <T> T readValue(String json) {
 		return readValue(json, (TypeUtil)null);
 	}
 	public <T> T readValue(String json, T pre) {
-		return readValue(json, pre, (TypeUtil)null);
+		return readValue(json, pre, pre == null ? null : TypeUtil.get(pre.getClass()));
 	}
 }

@@ -1,6 +1,6 @@
 package net.etalia.jalia;
 
-import net.etalia.jalia.annotations.JsonAllowNewEntities;
+import net.etalia.jalia.annotations.JsonAllowNewInstances;
 import net.etalia.jalia.annotations.JsonMap;
 import org.junit.Before;
 import org.junit.Test;
@@ -8,8 +8,6 @@ import static org.hamcrest.Matchers.*;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.junit.Assert.*;
 
 public class MapJsonDeSerTest extends TestBase {
 
@@ -58,7 +56,7 @@ public class MapJsonDeSerTest extends TestBase {
         String name;
         Map<String, Chained> data = new HashMap<>();
 
-        @JsonAllowNewEntities
+        @JsonAllowNewInstances
         public Map<String, Chained> getData() {
             return data;
         }
