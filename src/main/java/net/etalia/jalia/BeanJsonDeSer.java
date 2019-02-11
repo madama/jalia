@@ -1,10 +1,7 @@
 package net.etalia.jalia;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import net.etalia.jalia.stream.JsonReader;
 import net.etalia.jalia.stream.JsonToken;
@@ -319,7 +316,7 @@ public class BeanJsonDeSer implements JsonDeSer {
 		while (input.hasNext()) {
 			String name = input.nextName();
 			context.deserializationEntering(name);
-			context.putLocalStack(cd.getOptions(name));			
+			context.putLocalStack(cd.getOptions(name));
 			Object preval = null;
 			TypeUtil hintval = cd.getSetHint(name);
 			if (hintval == null) hintval = cd.getGetHint(name);
@@ -330,6 +327,13 @@ public class BeanJsonDeSer implements JsonDeSer {
 			try {
 				Object nval = context.getMapper().readValue(context, preval, hintval);
 				cd.setValue(name, nval, pre);
+				if (context.getFromStackBoolean(DefaultOptions.RECORD_CHANGES.toString())) {
+					Object originalValue = context.getFromStack(CTX_ALL_ORIGINAL_VALUE);
+					if (originalValue == null) {
+						originalValue = preval;
+					}
+					context.getMapper().getChangeRecorder().recordBeanChange(pre, name, originalValue, nval);
+				}
 			} finally {
 				context.deserializationExited();
 			}

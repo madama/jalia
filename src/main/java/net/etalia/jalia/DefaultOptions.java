@@ -27,6 +27,11 @@ public enum DefaultOptions implements Option<Boolean> {
 	/**
 	 * Always "unroll" (that is, serialize completely) linked entities, instead of only sending their ids.
 	 */
-	UNROLL_OBJECTS
+	UNROLL_OBJECTS,
+
+	/**
+	 * Record object changes while deserializing, see {@link ChangeRecorder}.
+	 */
+	RECORD_CHANGES
 	
 }

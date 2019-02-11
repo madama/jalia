@@ -195,7 +195,37 @@ public class ConcurrencyAndSpeedTest {
 			tot ^= p.hashCode();
 		}
 		long elaps = System.currentTimeMillis() - start;
-		System.out.println(rounds + "\t Full bean deser done \t in " + elaps + "ms \t = " + (elaps / (double)rounds) + "ms each");
+		System.out.println(rounds + "\t Full bean deser (CR) done \t in " + elaps + "ms \t = " + (elaps / (double)rounds) + "ms each");
+		System.out.println(p);
+	}
+
+	@Test
+	public void speedOnDeserializingFullBeanNoRecording() throws Exception {
+		final int rounds = 1_000_000;
+
+		long tot = 0;
+		mapper.setOption(DefaultOptions.RECORD_CHANGES, false);
+
+		// Ramp up
+		for (int i = 0; i < rounds/10; i++) {
+			tot ^= mapper.readValue(personFullBytes, DummyPerson.class).hashCode();
+		}
+
+		tot = 0;
+		if (sleep > 0) {
+			System.out.println("About to start test, hook up profiler");
+			Thread.sleep(sleep);
+			System.out.println("Test started");
+		}
+
+		long start = System.currentTimeMillis();
+		DummyPerson p = null;
+		for (int i = 0; i < rounds; i++) {
+			p = mapper.readValue(personFullBytes, DummyPerson.class);
+			tot ^= p.hashCode();
+		}
+		long elaps = System.currentTimeMillis() - start;
+		System.out.println(rounds + "\t Full bean deser (no CR) done \t in " + elaps + "ms \t = " + (elaps / (double)rounds) + "ms each");
 		System.out.println(p);
 	}
 	

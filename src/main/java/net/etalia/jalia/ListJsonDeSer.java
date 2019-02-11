@@ -81,6 +81,8 @@ public class ListJsonDeSer implements JsonDeSer {
 	 * <p>
 	 * During deserialization, the following applies:
 	 * <ul>
+	 *     <li>If {@link DefaultOptions#RECORD_CHANGES} is active, the existing collection (if any) will be copied in
+	 *     an ArrayList and used as original value in the recording.
 	 *     <li>The existing collection will be reused, unless {@link JsonCollection#drop()} is set.
 	 *     <li>Existing values inside the collection, if any, will be reused and updated with found JSON, as long as
 	 *     there is a pre-existing collection to reuse, and at given index there is an object to reuse.
@@ -122,6 +124,13 @@ public class ListJsonDeSer implements JsonDeSer {
 				}
 			}
 		}
+
+		Collection<Object> originalValue = null;
+		if (context.getFromStackBoolean(DefaultOptions.RECORD_CHANGES.toString()) && act != null) {
+			originalValue = new ArrayList<>(act);
+			context.putLocalStack(CTX_ALL_ORIGINAL_VALUE, originalValue);
+		}
+
 		if (context.getFromStackBoolean(DROP) || inner == null || !inner.hasConcrete() || inner.getConcrete() == Object.class) {
 			if (context.getFromStackBoolean(DROP)) act = null;
 			if (hint != null) {

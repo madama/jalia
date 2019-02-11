@@ -12,15 +12,13 @@ import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.*;
 
 import java.math.BigDecimal;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import net.etalia.jalia.ObjectMapper;
 import net.etalia.jalia.TypeUtil;
 import net.etalia.jalia.DummyAddress.AddressType;
 
+import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -310,7 +308,7 @@ public class ObjectMapperDeserializeTest extends TestBase {
 		provider.addToDb(new DummyPerson("p1", "Simone","Gianni"));
 		om.setEntityNameProvider(provider);
 		om.setEntityFactory(provider);
-		om.setClassDataFactory(provider);		
+		om.setClassDataFactory(provider);
 		om.init();
 		Object val = om.readValue(json.replace("'", "\""));
 		
@@ -327,6 +325,12 @@ public class ObjectMapperDeserializeTest extends TestBase {
 		
 		checkThat(person.getAddresses().get(0).getType(), equalTo(AddressType.EMAIL));
 		checkThat(person.getAddresses().get(0).getAddress(), equalTo("m.rossi@gmail.com"));
+
+		ChangeRecorder changeRecorder = om.getChangeRecorder();
+		ChangeRecorder.Change<Collection<DummyAddress>> addressesChange = changeRecorder.getChange(val, "addresses");
+		checkThat(addressesChange, notNullValue());
+		checkThat(addressesChange.getOldValue(), hasSize(0));
+		checkThat(addressesChange.getNewValue(), hasSize(1));
 	}
 	
 	@Test(expected=JaliaException.class)

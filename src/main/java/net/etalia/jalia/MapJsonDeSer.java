@@ -1,11 +1,7 @@
 package net.etalia.jalia;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import net.etalia.jalia.annotations.JsonMap;
 import net.etalia.jalia.stream.JsonReader;
@@ -104,6 +100,12 @@ public class MapJsonDeSer implements JsonDeSer {
 		}
 		if (hint != null) {
 			inner = hint.findReturnTypeOf("remove", Object.class);
+		}
+
+		Map<String, Object> originalValue = null;
+		if (context.getFromStackBoolean(DefaultOptions.RECORD_CHANGES.toString()) && act != null) {
+			originalValue = new HashMap<>(act);
+			context.putLocalStack(CTX_ALL_ORIGINAL_VALUE, originalValue);
 		}
 
 		if (act == null || context.getFromStackBoolean(DROP)) {

@@ -73,6 +73,11 @@ public class ObjectMapper {
 	private JsonClassDataFactory classDataFactory = new JsonClassDataFactoryImpl();
 
 	/**
+	 * ChangeRecorder used by this mapper, defaults to the shared instance.
+	 */
+	private ChangeRecorder changeRecorder = ChangeRecorder.getSharedInstance();
+
+	/**
 	 * Default serialization and deserializtion options.
 	 */
 	private final Map<String,Object> defaultOptions = new HashMap<String, Object>();
@@ -81,6 +86,7 @@ public class ObjectMapper {
 		defaultOptions.put(DefaultOptions.PRETTY_PRINT.toString(), false);
 		defaultOptions.put(DefaultOptions.INCLUDE_EMPTY.toString(), false);
 		defaultOptions.put(DefaultOptions.INCLUDE_NULLS.toString(), false);
+		defaultOptions.put(DefaultOptions.RECORD_CHANGES.toString(), true);
 	}
 
 	/**
@@ -178,6 +184,22 @@ public class ObjectMapper {
 	 */
 	public List<JsonDeSer> getRegisteredDeSers() {
 		return registeredDeSers;
+	}
+
+	/**
+	 * Set the {@link ChangeRecorder} to use with this ObjectMapper.
+	 * @param changeRecorder the change recorder to use.
+	 */
+	public void setChangeRecorder(ChangeRecorder changeRecorder) {
+		this.changeRecorder = changeRecorder;
+	}
+
+	/**
+	 * @return the change recorder used by this ObjectMapper, default to the shared instance returned by
+	 * {@link ChangeRecorder#getSharedInstance()}
+	 */
+	public ChangeRecorder getChangeRecorder() {
+		return changeRecorder;
 	}
 
 	/**

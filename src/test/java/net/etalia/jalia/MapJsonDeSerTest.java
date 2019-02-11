@@ -160,6 +160,11 @@ public class MapJsonDeSerTest extends TestBase {
         checkThat(existing.getData().get("v1"), notNullValue());
         checkThat(existing.getData().get("v1"), not(sameInstance((Object)preChild)));
         checkThat(existing.getData(), sameInstance(preData));
+
+        ChangeRecorder.Change<Map<String, Object>> change = mapper.getChangeRecorder().getChange(existing, "data");
+        checkThat(change, notNullValue());
+        checkThat(change.getOldValue().keySet(), hasItems("v1"));
+        checkThat(change.getNewValue().keySet(), hasItems("v1", "v2"));
     }
 
     @Test

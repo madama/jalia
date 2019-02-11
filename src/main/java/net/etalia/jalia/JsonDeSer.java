@@ -13,6 +13,11 @@ public interface JsonDeSer {
 	String CTX_ALL_SERIALIZESTACK = "All_SerializeStack";
 
 	/**
+	 * Key used by all deserializers to report to the parent deserializer the original value.
+	 */
+	String CTX_ALL_ORIGINAL_VALUE = "All_OriginalValue";
+
+	/**
 	 * Check whether this instance can serialize a class in the current serialization context.
 	 * @param context The current serialization context.
 	 * @param clazz The clazz that needs to be serialized.

@@ -63,7 +63,11 @@ public class DummyEntityProvider implements EntityFactory, EntityNameProvider, J
 		}
 		try {
 			if (clazz == DummyAddress.class) {
-				ret = new DummyAddress(id.toString(), null, null);
+				if (id != null) {
+					ret = new DummyAddress(id.toString(), null, null);
+				} else {
+					ret = null;
+				}
 			} else if (clazz == DummyPerson.class) {
 				ret = new DummyPerson();
 			} else {

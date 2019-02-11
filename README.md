@@ -592,6 +592,40 @@ public class User {
 
 Now, an update can freely add, remove, modify existing and create new entities.
 
+Deserialized differences
+------------------------
+
+While Jalia will magically load the entity, deserialize JSON over the existing entity applying changes, and give
+you the already updated data, it will hide which changes happened during the deserialization.
+
+Let's suppose, for the sake of an example, that you need to update an external ActiveDirectory when the user is changed,
+by removing the user from previous some "city" groups when the addresses are changed. To do this, we need to
+retrieve the previous list of Addresses, which is doable using the ChangeRecorder:
+
+```java
+@PutMapping("/{id}")
+public void updateUser(@RequestBody @IdPathRequestBody @Valid User user) {
+  Change<List<Address>> addressesChange = ChangeRecorder.getChange(user, "addresses");
+  List<Address> previousAddresses = addressChange.getOldValue();
+  // Use the list of previous addresses to find differences and do what you need
+  users.save(user);
+}
+
+```
+
+Note that change recording adds a moderate overhead to the deserialization, around 15%, so if your project does not
+need it, configure the ObjectMapper not to record it:
+
+```
+@Bean
+public ObjectMapper objectMapper() {
+  ObjectMapper mapper = new ObjectMapper();
+  mapper.setOption(DefaultOptions.RECORD_CHANGES, false);
+  return mapper;
+}
+
+```
+
 Deserializing new entities
 --------------------------
 
