@@ -3,7 +3,8 @@ package net.etalia.jalia;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -14,14 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import net.etalia.jalia.JsonClassData;
-import net.etalia.jalia.ObjectMapper;
-import net.etalia.jalia.OutField;
 import net.etalia.jalia.DummyAddress.AddressType;
-
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class ObjectMapperSerializeTest extends TestBase {
@@ -492,7 +486,7 @@ public class ObjectMapperSerializeTest extends TestBase {
 			
 			checkThat(json, not(containsString("\"type\":")));
 			checkThat(json, not(containsString("\"EMAIL\"")));
-			checkThat(json, not(containsString("\"similars\":")));
+			checkThat(json, not(containsString("\"places\":")));
 			
 		}
 		{
@@ -520,7 +514,7 @@ public class ObjectMapperSerializeTest extends TestBase {
 		{
 			OutField of = new OutField(null);
 			of.getCreateSub("name");
-			of.getCreateSub("similars.name");
+			of.getCreateSub("places.address");
 			
 			String json = mapper.writeValueAsString(person, of);
 			System.out.println(json);
@@ -530,8 +524,8 @@ public class ObjectMapperSerializeTest extends TestBase {
 			
 			checkThat(json, not(containsString("\"surname\":")));
 			checkThat(json, not(containsString("\"Gianni\"")));
-			
-			checkThat(json, containsString("\"similars\":"));
+
+			checkThat(json, containsString("\"places\":"));
 		}
 		
 	}
@@ -678,4 +672,12 @@ public class ObjectMapperSerializeTest extends TestBase {
 		checkThat(om.writeValueAsString(null), equalTo("null"));
 	}
 
+	@Test
+	public void giveOptionSerializesOnDemandOnly() {
+		ObjectMapper om = new ObjectMapper();
+		om.setOption(DefaultOptions.ALWAYS_SERIALIZE_ON_DEMAND_ONLY, true);
+
+		String json = om.writeValueAsString(new DummyPerson());
+		checkThat(json, containsString("places"));
+	}
 }

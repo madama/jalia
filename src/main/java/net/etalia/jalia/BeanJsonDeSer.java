@@ -126,7 +126,11 @@ public class BeanJsonDeSer implements JsonDeSer {
 		}
 		JsonClassData cd = context.getMapper().getClassDataFactory().getClassData(obj.getClass(), context);
 		Set<String> sents = new HashSet<>();
-		for (String name : cd.getSortedGettables()) {
+		List<String> toSend = cd.getSortedGettables();
+		if (context.getFromStackBoolean(DefaultOptions.ALWAYS_SERIALIZE_ON_DEMAND_ONLY.toString())) {
+			toSend.addAll(cd.getOnDemandGettables());
+		}
+		for (String name : toSend) {
 			if (context.entering(name, cd.getDefaults())) {
 				sents.add(name);
 				output.name(name);
@@ -139,6 +143,7 @@ public class BeanJsonDeSer implements JsonDeSer {
 				}
 			}
 		}
+
 		for (String name : context.getCurrentSubs()) {
 			if (sents.contains(name)) continue;
 			if (idSent && name.equals("id")) continue;

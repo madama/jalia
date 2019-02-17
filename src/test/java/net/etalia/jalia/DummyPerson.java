@@ -9,8 +9,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import net.etalia.jalia.annotations.*;
+import net.etalia.jalia.DummyAddress.AddressType;
+import net.etalia.jalia.annotations.JsonAllowEntityPropertyChanges;
+import net.etalia.jalia.annotations.JsonAllowNewInstances;
+import net.etalia.jalia.annotations.JsonOnDemandOnly;
+import net.etalia.jalia.annotations.JsonRequireIdForReuse;
+import net.etalia.jalia.annotations.JsonSetter;
 
 
 public class DummyPerson extends DummyEntity {
@@ -113,8 +117,8 @@ public class DummyPerson extends DummyEntity {
 	}
 	
 	@JsonOnDemandOnly
-	public List<DummyPerson> getSimilars() {
-		return Arrays.asList(new DummyPerson("p1-1", "Test", "Similar"));
+	public List<DummyAddress> getPlaces() {
+		return Arrays.asList(new DummyAddress("a-1", AddressType.HOME, "A common place"));
 	}
 
 	public Integer getAge() {

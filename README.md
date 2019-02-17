@@ -18,8 +18,8 @@ Jalia is Java Beans and entity oriented, meaning that:
 - it will use your getters and setters
 - it will respect your List and Map instances
 - it will use your entities by matching them by id
-- it is compatible with Spring, Spring Boot, JPA using Hibernate and other providers, Lombok, AspectJ and other similar
-utilities
+- it is compatible with Spring, Spring Boot, Flux server and client (in spring boot), JPA using Hibernate and other
+providers, Lombok, AspectJ and other similar utilities
 - it supports polymorphism and other Java OO features
 - it is fast, taking 0.01 milliseconds on single core on both serialization and deserialization of beans.
 

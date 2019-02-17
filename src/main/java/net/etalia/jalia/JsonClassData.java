@@ -411,6 +411,10 @@ public class JsonClassData {
 		return ret;
 	}
 
+	public Set<String> getOnDemandGettables() {
+		return this.ondemand.keySet();
+	}
+
 	/**
 	 * @return a set of all visible property names that can be written.
 	 */

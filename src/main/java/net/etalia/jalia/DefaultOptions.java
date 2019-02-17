@@ -32,6 +32,11 @@ public enum DefaultOptions implements Option<Boolean> {
 	/**
 	 * Record object changes while deserializing, see {@link ChangeRecorder}.
 	 */
-	RECORD_CHANGES
+	RECORD_CHANGES,
+
+	/**
+	 * Always serializes properties annotated with @{@link net.etalia.jalia.annotations.JsonOnDemandOnly}.
+	 */
+	ALWAYS_SERIALIZE_ON_DEMAND_ONLY
 	
 }
