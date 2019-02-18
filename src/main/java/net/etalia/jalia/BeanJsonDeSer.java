@@ -1,8 +1,11 @@
 package net.etalia.jalia;
 
 import java.io.IOException;
-import java.util.*;
-
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import net.etalia.jalia.stream.JsonReader;
 import net.etalia.jalia.stream.JsonToken;
 import net.etalia.jalia.stream.JsonWriter;
@@ -10,8 +13,9 @@ import net.etalia.jalia.stream.JsonWriter;
 public class BeanJsonDeSer implements JsonDeSer {
 
 	public static final String REUSE_WITHOUT_ID = "BEAN_JSON_DESER_REUSEWITHOUTID";
-	public static final String ALLOW_NEW = "BEAN_JSON_DESER_ALLOWNEW";
-    public static final String ALLOW_CHANGES = "BEAN_JSON_DESER_ALLOWCHANGES";
+	// Using the same name as the default option so it is automatically inherited
+	public static final String ALLOW_NEW = DefaultOptions.ALWAYS_ALLOW_NEW_INSTANCES.name();
+	public static final String ALLOW_CHANGES = DefaultOptions.ALWAYS_ALLOW_ENTITY_PROPERTY_CHANGES.name();
 	private static final String CTX_BEAN_JSON_DE_SER_DONES = "BeanJsonDeSer_Dones";
 	private static final String CTX_BEAN_JSON_DE_SER_SENTS = "BeanJsonDeSer_Sents";
 
@@ -60,70 +64,74 @@ public class BeanJsonDeSer implements JsonDeSer {
 		
 		ObjectMapper mapper = context.getMapper();
 		EntityFactory factory = context.getMapper().getEntityFactory();
+		EntityNameProvider nameProvider = context.getMapper().getEntityNameProvider();
+
+		String entityName = obj.getClass().getSimpleName();
+		if (mapper.getEntityNameProvider() != null) {
+			entityName = mapper.getEntityNameProvider().getEntityName(obj.getClass());
+		}
+
+		Object id = null;
+		String fullId = null;
 		if (factory != null) {
 			obj = factory.prepare(obj, true, context);
 			if (obj == null) {
 				output.nullValue();
 				return;
-			}			
-			
-			Object id = factory.getId(obj, context);
+			}
+
+			id = factory.getId(obj, context);
 			if (id != null) {
-				// Prevent loops in serialization
-				if (context.hasInLocalStack(CTX_ALL_SERIALIZESTACK, obj)) {
-					if (!context.getFromStackBoolean(DefaultOptions.UNROLL_OBJECTS.toString()) || context.isSerializingAll()) {
-						idDeser.serialize(id, context);
-						return;
-					}
+				fullId = id.toString();
+				if (entityName != null) {
+					fullId = nameProvider.getEntityName(obj.getClass()) + ":" + fullId;
 				}
-				
-				// Prevent sending and object twice, send only the id, unless DefaultOptions.UNROLL_OBJECT
-				Map<String,Object> sents = (Map<String, Object>) context.get(CTX_BEAN_JSON_DE_SER_SENTS);
-				if (sents == null) {
-					sents = new HashMap<>();
-					context.put(CTX_BEAN_JSON_DE_SER_SENTS, sents);
-				}
-				if (sents.containsKey(id.toString()) && !context.getFromStackBoolean(DefaultOptions.UNROLL_OBJECTS.toString())) {
-					idDeser.serialize(id, context);
-					return;
-				}
-				sents.put(id.toString(), obj);
 			}
 		}
 
-		if (context.hasInLocalStack(CTX_ALL_SERIALIZESTACK, obj)) {
+		if (id == null && context.hasInLocalStack(CTX_ALL_SERIALIZESTACK, obj)) {
 			if (!context.getFromStackBoolean(DefaultOptions.UNROLL_OBJECTS.toString()) || context.isSerializingAll()) {
 				// TODO this avoid loops, but also break serialization, cause there is no id to send
 				output.clearName();
 				return;
 			}
 		}
-		
-		context.putLocalStack(CTX_ALL_SERIALIZESTACK, obj);
-		
+
 		output.beginObject();
-		boolean sentEntity = false;
-		if (mapper.getEntityNameProvider() != null) {
-			String entityName = mapper.getEntityNameProvider().getEntityName(obj.getClass());
-			if (entityName != null) {
-				output.name("@entity");
-				output.value(entityName);
-				sentEntity = true;
-			}
-		}
-		if (!sentEntity) {
+		if (entityName != null) {
 			output.name("@entity");
-			output.value(obj.getClass().getSimpleName());
+			output.value(entityName);
 		}
 		boolean idSent = false;
-		if (factory != null) {
-			Object id = factory.getId(obj, context);
-			if (id != null) {
-				output.name("id");
-				idDeser.serialize(id, context);
-				idSent = true;
+		if (id != null) {
+			output.name("id");
+			idDeser.serialize(id, context);
+			idSent = true;
+			// Prevent loops in serialization
+			if (context.hasInLocalStack(CTX_ALL_SERIALIZESTACK, obj)) {
+				if (!context.getFromStackBoolean(DefaultOptions.UNROLL_OBJECTS.toString()) || context
+						.isSerializingAll()) {
+					output.endObject();
+					return;
+				}
 			}
+
+			// Prevent sending an object twice, send only the id, unless DefaultOptions.UNROLL_OBJECT
+			Map<String, Object> sents = (Map<String, Object>) context.get(CTX_BEAN_JSON_DE_SER_SENTS);
+			if (sents == null) {
+				sents = new HashMap<>();
+				context.put(CTX_BEAN_JSON_DE_SER_SENTS, sents);
+			}
+			if (sents.containsKey(fullId) && !context
+					.getFromStackBoolean(DefaultOptions.UNROLL_OBJECTS.toString())) {
+				output.endObject();
+				return;
+			}
+			sents.put(fullId, obj);
 		}
+
+		context.putLocalStack(CTX_ALL_SERIALIZESTACK, obj);
+
 		JsonClassData cd = context.getMapper().getClassDataFactory().getClassData(obj.getClass(), context);
 		Set<String> sents = new HashSet<>();
 		List<String> toSend = cd.getSortedGettables();

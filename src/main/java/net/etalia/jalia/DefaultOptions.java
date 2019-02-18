@@ -37,6 +37,17 @@ public enum DefaultOptions implements Option<Boolean> {
 	/**
 	 * Always serializes properties annotated with @{@link net.etalia.jalia.annotations.JsonOnDemandOnly}.
 	 */
-	ALWAYS_SERIALIZE_ON_DEMAND_ONLY
-	
+	ALWAYS_SERIALIZE_ON_DEMAND_ONLY,
+
+	/**
+	 * Always allows creation of new instances, as if all methods were annotated with {@link
+	 * net.etalia.jalia.annotations.JsonAllowNewInstances}
+	 */
+	ALWAYS_ALLOW_NEW_INSTANCES,
+
+	/**
+	 * Always allows entity property changes, as if all methods were annotated with {@link
+	 * net.etalia.jalia.annotations.JsonAllowEntityPropertyChanges}
+	 */
+	ALWAYS_ALLOW_ENTITY_PROPERTY_CHANGES
 }

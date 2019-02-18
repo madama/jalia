@@ -1,16 +1,17 @@
 package net.etalia.jalia;
 
-import net.etalia.jalia.annotations.JsonAllowEntityPropertyChanges;
-import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.sameInstance;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.hamcrest.Matchers.*;
+import net.etalia.jalia.annotations.JsonAllowEntityPropertyChanges;
+import org.junit.Before;
+import org.junit.Test;
 
 public class JsonAllowEntityPropertyChangesTest extends TestBase {
 
@@ -115,6 +116,21 @@ public class JsonAllowEntityPropertyChangesTest extends TestBase {
         checkThat(result.getDeny(), sameInstance(sub));
         checkThat(result.getDeny().getName(), equalTo("sub"));
     }
+
+    @Test
+    public void shouldAllowModificationOnForbiddenEntityIfOptionsSet() {
+        existing.setDeny(sub);
+        withFactory.setOption(DefaultOptions.ALWAYS_ALLOW_ENTITY_PROPERTY_CHANGES, true);
+
+        Basic result = readExisting(withFactory,
+                "{'name':'newbase','deny':{'id':'s1','name':'newsub'}}");
+
+        checkThat(result, sameInstance(existing));
+        checkThat(result.getName(), equalTo("newbase"));
+        checkThat(result.getDeny(), sameInstance(sub));
+        checkThat(result.getDeny().getName(), equalTo("newsub"));
+    }
+
 
     @Test
     public void shouldAllowModificationOnPojo() {

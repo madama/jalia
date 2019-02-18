@@ -1,15 +1,18 @@
 package net.etalia.jalia;
 
-import static org.hamcrest.Matchers.*;
-import net.etalia.jalia.annotations.JsonAllowNewInstances;
-import net.etalia.jalia.annotations.JsonAllowEntityPropertyChanges;
-import org.junit.Test;
-import org.mockito.Mockito;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.etalia.jalia.annotations.JsonAllowEntityPropertyChanges;
+import net.etalia.jalia.annotations.JsonAllowNewInstances;
+import org.junit.Test;
+import org.mockito.Mockito;
 
 public class JsonAllowNewInstancesTest extends TestBase {
 
@@ -90,6 +93,20 @@ public class JsonAllowNewInstancesTest extends TestBase {
                 "{'name':'test','deny':{'name':'new'}}".replaceAll("'","\""),
                 AllowDeny.class);
     }
+
+    @Test
+    public void shouldPermitForbiddenNewEntityWhenOptionSet() {
+        ObjectMapper om = new ObjectMapper();
+        om.setOption(DefaultOptions.ALWAYS_ALLOW_NEW_INSTANCES, true);
+        AllowDeny obj = om.readValue(
+                "{'name':'test','deny':{'name':'new'}}".replaceAll("'", "\""),
+                AllowDeny.class);
+        checkThat(obj, notNullValue());
+        checkThat(obj.name, equalTo("test"));
+        checkThat(obj.getDeny(), notNullValue());
+        checkThat(obj.getDeny().getName(), equalTo("new"));
+    }
+
 
     @Test
     public void shouldNotPermitNewEntityWithFactory() {

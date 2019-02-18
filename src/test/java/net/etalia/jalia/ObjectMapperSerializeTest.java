@@ -3,6 +3,7 @@ package net.etalia.jalia;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -340,10 +341,9 @@ public class ObjectMapperSerializeTest extends TestBase {
 		}
 		
 		System.out.println(json);
-		
-		checkThat(json,containsString("p1"));
-		checkThat(json,containsString("p2"));
-		checkThat(json,containsString("[\"p1\"]"));
+
+		checkThat(json,
+				stringContainsInOrder(Arrays.asList("p1", "friends", "[", "p2", "friends", "[", "id", "p1", "]", "]")));
 	}
 	
 	@Test
@@ -429,8 +429,8 @@ public class ObjectMapperSerializeTest extends TestBase {
 			json = om.writeValueAsString(map);
 			System.out.println(json);
 			// Assert each p1 and p2 are serialized only once
-			checkThat(countOccurrencies("\"id\":\"p1\"", json),equalTo(1));
-			checkThat(countOccurrencies("\"id\":\"p2\"", json),equalTo(1));
+			checkThat(countOccurrencies("\"name\":\"Persona1\"", json), equalTo(1));
+			checkThat(countOccurrencies("\"name\":\"Persona2\"", json), equalTo(1));
 			
 			// Assert the others all have only the id
 			// p1 is in id:p1 when unrolled, then "p1" in the kpl list, then ["p1"] in friends of p2, then in kp1 and kp1_2
@@ -679,5 +679,31 @@ public class ObjectMapperSerializeTest extends TestBase {
 
 		String json = om.writeValueAsString(new DummyPerson());
 		checkThat(json, containsString("places"));
+	}
+
+	@Test
+	public void serializeDifferentClassesWithSameId() {
+		List<DummyEntity> entities = new ArrayList<>();
+		entities.add(new DummyPerson("1", "Person", "Person", new DummyAddress("1", AddressType.HOME, "Via")));
+		entities.add(new DummyAddress("1", AddressType.HOME, "Altra"));
+		entities.add(new DummyAddress("2", AddressType.HOME, "Altra"));
+
+		ObjectMapper mapper = new ObjectMapper();
+		DummyEntityProvider provider = new DummyEntityProvider();
+		mapper.setEntityNameProvider(provider);
+		mapper.setEntityFactory(provider);
+		mapper.setClassDataFactory(provider);
+		mapper.init();
+
+		String json = mapper.writeValueAsString(entities);
+
+		checkThat(json, stringContainsInOrder(Arrays.asList(
+				"@entity", "Person", "id", "1",
+				"addresses", "[",
+				"@entity", "Address", "id", "1", "address", "Via",
+				"]",
+				"@entity", "Address", "id", "1", "}",
+				"@entity", "Address", "id", "2", "Altra", "}"
+		)));
 	}
 }
