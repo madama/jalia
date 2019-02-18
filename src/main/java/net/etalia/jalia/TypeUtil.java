@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
 import net.etalia.utils.MissHolder;
 
 /**
@@ -56,6 +55,24 @@ public class TypeUtil {
 	}
 
 	/**
+	 * Get the TypeUtil for a given type of list (or Set or Array) having the given element type.
+	 *
+	 * <p>
+	 * Not that the returned TypeUtil is not complete like a real one extracted for a real type: while {@link
+	 * #getListOrSetType()}, {@link #getArrayType()} and {@link #getArrayListOrSetType()} will return the given element
+	 * type and most of the other methods will behave correctly, methods analyzing the type structure like {@link
+	 * #findParameterOf(String, int)} and {@link #findReturnTypeOf(String, Class[])} will work on the basic, untyped,
+	 * list type.
+	 *
+	 * @param listType the type of the List or Set collection, or Array
+	 * @param inner the type of the elements of the collection
+	 * @return a TypeUtil representing (with limitations documented above) the requested type.
+	 */
+	public static TypeUtil getList(Type listType, Type inner) {
+		return new TypeUtil(listType, inner);
+	}
+
+	/**
 	 * The type this instance if handling.
 	 */
 	private final Type type;
@@ -84,10 +101,20 @@ public class TypeUtil {
 	/**
 	 * Cached value, true if the type this instance if handling is instantiatable.
 	 */
-	private Boolean isInstantiatableCache; 
+	private Boolean isInstantiatableCache;
+
+	/**
+	 * Cached value of the inner type of an array, list or set.
+	 */
+	private TypeUtil inner;
 	
 	private TypeUtil(Type type) {
 		this.type = type;
+	}
+
+	private TypeUtil(Type type, Type inner) {
+		this.type = type;
+		this.inner = get(inner);
 	}
 
 	/**
@@ -378,14 +405,17 @@ public class TypeUtil {
 	 * "Person"
 	 */
 	public TypeUtil getArrayType() {
-		return get(getConcrete().getComponentType());
+		if (inner == null) {
+			inner = get(getConcrete().getComponentType());
+		}
+		return inner;
 	}
 
 	/**
 	 * @return true if this type is a {@link List} or {@link Set}
 	 */
 	public boolean isListOrSet() {
-		return (List.class.isAssignableFrom(this.getConcrete()) || Set.class.isAssignableFrom(this.getConcrete()));
+		return (List.class.isAssignableFrom(getConcrete()) || Set.class.isAssignableFrom(getConcrete()));
 	}
 
 	/**
@@ -393,11 +423,12 @@ public class TypeUtil {
 	 * return the TypeUtil handling "String"
 	 */
 	public TypeUtil getListOrSetType() {
-		TypeUtil inner = null;
-		if (List.class.isAssignableFrom(this.getConcrete())) {
-			inner = this.findReturnTypeOf("get", Integer.TYPE);
-		} else if (Set.class.isAssignableFrom(this.getConcrete())) {
-			inner = this.findParameterOf("add", 0);
+		if (inner == null) {
+			if (List.class.isAssignableFrom(getConcrete())) {
+				inner = findReturnTypeOf("get", Integer.TYPE);
+			} else if (Set.class.isAssignableFrom(getConcrete())) {
+				inner = findParameterOf("add", 0);
+			}
 		}
 		return inner;
 	}
@@ -406,17 +437,21 @@ public class TypeUtil {
 	 * @return get the constituent type of this array or {@link List} or {@link Set}
 	 */
 	public TypeUtil getArrayListOrSetType() {
-		if (this.isArray()) return this.getArrayType();
-		if (this.isListOrSet()) return this.getListOrSetType();
+		if (isArray()) {
+			return getArrayType();
+		}
+		if (isListOrSet()) {
+			return getListOrSetType();
+		}
 		return null;
 	}
 
 	public boolean isDescendantOf(TypeUtil other) {
-		return other.getConcrete().isAssignableFrom(this.getConcrete());
+		return other.getConcrete().isAssignableFrom(getConcrete());
 	}
 
 	public boolean isParentOf(TypeUtil other) {
-		return this.getConcrete().isAssignableFrom(other.getConcrete());
+		return getConcrete().isAssignableFrom(other.getConcrete());
 	}
 
 	/**
@@ -432,14 +467,15 @@ public class TypeUtil {
 		public T mockGet() {
 			return null;
 		}
+
 		public TypeUtil type() {
-			return get(this.getClass()).findReturnTypeOf("mockGet");
+			return get(getClass()).findReturnTypeOf("mockGet");
 		}
 	}
 	
 	@Override
 	public String toString() {
-		return "TypeUtil[" + this.type + "]";
+		return "TypeUtil[" + type + "]";
 	}
 
 }
