@@ -1,11 +1,8 @@
 package net.etalia.jalia.spring;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
-
 import net.etalia.jalia.ObjectMapper;
 import net.etalia.jalia.TypeUtil;
-
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -27,7 +24,6 @@ public class JaliaHttpMessageConverter extends AbstractHttpMessageConverter<Obje
 
 	@Override
 	protected boolean supports(Class<?> clazz) {
-		//return Persistent.class.isAssignableFrom(clazz);
 		return true;
 	}
 

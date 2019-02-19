@@ -539,7 +539,7 @@ public class UserController {
   private UserJpaRepository users;
 
   @PutMapping("/{id}")
-  public void updateUser(@RequestBody @IdPathRequestBody @Valid User user) {
+  public void updateUser(@IdPathRequestBody @Valid User user) {
     users.save(user);
   }
 }
@@ -560,6 +560,9 @@ PUT /users/1
 Jalia will load the entity using the id taken from the path variable thanks to the @IdPathRequestBody, inferring the
 type based on the method parameter as before. It will then modify the entity changing the "firstName", while all the
 rest of the entity will be untouched.
+
+Note that @IdPathRequestBody replaces @RequestBody, with the same functionality, but loading the entity using the id
+from the path before applying changes.
 
 Note that:
 - it's not possible to create a new entity this way, because only the entity loaded using the "id" in the path will be
