@@ -31,7 +31,7 @@ public class BeanJsonDeSer implements JsonDeSer {
 	public int handlesDeserialization(JsonContext context, TypeUtil hint) {
 		JsonReader la = context.getInput().lookAhead();
 		try {
-			if (la.peek() != JsonToken.STRING && la.peek() != JsonToken.NULL) { 
+			if (la.peek() != JsonToken.STRING && la.peek() != JsonToken.NUMBER && la.peek() != JsonToken.NULL) {
 				if (la.peek() != JsonToken.BEGIN_OBJECT) return -1;
 				la.beginObject();
 				while (la.hasNext()) {
@@ -187,10 +187,14 @@ public class BeanJsonDeSer implements JsonDeSer {
 		boolean embedded = false;
 		
 		JsonReader input = context.getInput();
-		EntityFactory factory = context.getMapper().getEntityFactory();				
-		if (input.peek() == JsonToken.STRING) {
+		EntityFactory factory = context.getMapper().getEntityFactory();
+		if (input.peek() == JsonToken.STRING || input.peek() == JsonToken.NUMBER) {
 			// Embedded object
-			id = input.nextString();
+			if (input.peek() == JsonToken.STRING) {
+				id = input.nextString();
+			} else {
+				id = input.nextLong();
+			}
 			embedded = true;
 			// Search in already deserialized ones
 			Map<String,Object> dones = (Map<String, Object>) context.get(CTX_BEAN_JSON_DE_SER_DONES);
@@ -333,10 +337,7 @@ public class BeanJsonDeSer implements JsonDeSer {
 			Object preval = null;
 			TypeUtil hintval = cd.getSetHint(name);
 			if (hintval == null) hintval = cd.getGetHint(name);
-			// TODO this is not right, we don't know if a custom deserializer will need or not the previous value
-			if (hintval == null || !hintval.hasConcrete() || (!hintval.isCharSequence() && !hintval.isNumber())) {
-				preval = cd.getValue(name, pre);
-			}
+			preval = cd.getValue(name, pre);
 			try {
 				Object nval = context.getMapper().readValue(context, preval, hintval);
 				cd.setValue(name, nval, pre);
