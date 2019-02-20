@@ -1,6 +1,10 @@
 package net.etalia.jalia;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class ChangeRecorder {
 
@@ -10,7 +14,7 @@ public class ChangeRecorder {
         return sharedInstance;
     }
 
-    private WeakHashMap<Object, Map<String,Change<Object>>> changes = new WeakHashMap<>();
+    private WeakIdentityHashMap<Object, Map<String, Change<Object>>> changes = new WeakIdentityHashMap<>();
 
     public void recordBeanChange(Object bean, String property, Object oldValue, Object newValue) {
         Map<String, Change<Object>> map = changes.get(bean);
@@ -37,6 +41,11 @@ public class ChangeRecorder {
         return (Change<T>)map.get(property);
     }
 
+    public boolean hasChanged(Object bean, String property) {
+        Change<Object> change = getChange(bean, property);
+        return change != null && change.isChanged();
+    }
+
     public static class Change<T> {
         private final String field;
         private final T oldValue;
@@ -59,6 +68,10 @@ public class ChangeRecorder {
 
         public T getNewValue() {
             return newValue;
+        }
+
+        public boolean isChanged() {
+            return !Objects.equals(oldValue, newValue);
         }
     }
 }
