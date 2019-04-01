@@ -59,17 +59,12 @@ public class BeanJsonDeSer implements JsonDeSer {
 
 	@Override
 	public void serialize(Object obj, JsonContext context) throws IOException {
-		
+
 		JsonWriter output = context.getOutput();
 		
 		ObjectMapper mapper = context.getMapper();
-		EntityFactory factory = context.getMapper().getEntityFactory();
-		EntityNameProvider nameProvider = context.getMapper().getEntityNameProvider();
-
-		String entityName = obj.getClass().getSimpleName();
-		if (mapper.getEntityNameProvider() != null) {
-			entityName = mapper.getEntityNameProvider().getEntityName(obj.getClass());
-		}
+		EntityFactory factory = mapper.getEntityFactory();
+		EntityNameProvider nameProvider = mapper.getEntityNameProvider();
 
 		Object id = null;
 		String fullId = null;
@@ -79,7 +74,14 @@ public class BeanJsonDeSer implements JsonDeSer {
 				output.nullValue();
 				return;
 			}
+		}
 
+		String entityName = obj.getClass().getSimpleName();
+		if (nameProvider != null) {
+			entityName = nameProvider.getEntityName(obj.getClass());
+		}
+
+		if (factory != null) {
 			id = factory.getId(obj, context);
 			if (id != null) {
 				fullId = id.toString();
