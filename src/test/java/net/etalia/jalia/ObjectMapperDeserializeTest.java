@@ -772,4 +772,15 @@ public class ObjectMapperDeserializeTest extends TestBase {
 		checkThat(bean.getGetOnly(), equalTo("newvalue"));
 	}
 
+	@Test
+	public void updateWhenIgnoreIsSetOnlyAndOverridesIgnores() {
+		DummyAnnotations bean = new DummyAnnotations();
+		bean.setSetOnly("thevalue");
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.setOption(DefaultOptions.OVERRIDE_IGNORES, true);
+
+		mapper.readValue("{'setOnly':'newvalue'}".replace("'", "\""), bean);
+
+		checkThat(bean.getSetOnly(), equalTo("newvalue"));
+	}
 }

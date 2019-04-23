@@ -733,4 +733,17 @@ public class ObjectMapperSerializeTest extends TestBase {
 
 		checkThat(json, not(containsString("thevalue")));
 	}
+
+	@Test
+	public void doSerializeWhenIgnoreIsSetOnlyAndOverrideIgnoresIsSet() {
+		DummyAnnotations bean = new DummyAnnotations();
+		bean.setGetOnly("thevalue");
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.setOption(DefaultOptions.OVERRIDE_IGNORES, true);
+		OutField of = OutField.getRoot("getOnly");
+
+		String json = mapper.writeValueAsString(bean, of);
+
+		checkThat(json, containsString("thevalue"));
+	}
 }

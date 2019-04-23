@@ -49,5 +49,11 @@ public enum DefaultOptions implements Option<Boolean> {
 	 * Always allows entity property changes, as if all methods were annotated with {@link
 	 * net.etalia.jalia.annotations.JsonAllowEntityPropertyChanges}
 	 */
-	ALWAYS_ALLOW_ENTITY_PROPERTY_CHANGES
+	ALWAYS_ALLOW_ENTITY_PROPERTY_CHANGES,
+
+	/**
+	 * Override getters and setters annotated with {@link net.etalia.jalia.annotations.JsonIgnore}, and always serialize
+	 * and deserialize them.
+	 */
+	OVERRIDE_IGNORES
 }

@@ -159,7 +159,7 @@ public class BeanJsonDeSer implements JsonDeSer {
 			if (idSent && name.equals("id")) continue;
 			if (context.entering(name, cd.getDefaults())) {
 				Object val;
-				val = cd.getValue(name, obj);
+				val = cd.getValue(name, obj, context.getFromStackBoolean(DefaultOptions.OVERRIDE_IGNORES.toString()));
 				if (val == null && !context.getFromStackBoolean(DefaultOptions.INCLUDE_NULLS.toString())) {
 					context.exited();
 					continue;
@@ -342,7 +342,7 @@ public class BeanJsonDeSer implements JsonDeSer {
 			preval = cd.getValue(name, pre);
 			try {
 				Object nval = context.getMapper().readValue(context, preval, hintval);
-				cd.setValue(name, nval, pre);
+				cd.setValue(name, nval, pre, context.getFromStackBoolean(DefaultOptions.OVERRIDE_IGNORES.toString()));
 				if (context.getFromStackBoolean(DefaultOptions.RECORD_CHANGES.toString())) {
 					Object originalValue = context.getFromStack(CTX_ALL_ORIGINAL_VALUE);
 					if (originalValue == null) {

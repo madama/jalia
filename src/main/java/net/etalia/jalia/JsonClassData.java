@@ -397,7 +397,7 @@ public class JsonClassData {
 	 * Get the value of a property from and entity.
 	 * @param name The name of the property to read.
 	 * @param obj The entity to read from.
-	 * @param force If true, it will force getting the value even if the property is ognired.
+	 * @param force If true, it will force getting the value even if the property is ignored.
 	 * @return The value or null if the property is ignored and force is false, or if the property is not found or
 	 * an error occurs.
 	 */
