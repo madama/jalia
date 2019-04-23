@@ -2,14 +2,13 @@ package net.etalia.jalia;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import net.etalia.jalia.annotations.JsonDefaultFields;
 import net.etalia.jalia.annotations.JsonGetter;
 import net.etalia.jalia.annotations.JsonIgnore;
 import net.etalia.jalia.annotations.JsonIgnoreProperties;
 import net.etalia.jalia.annotations.JsonInclude;
-import net.etalia.jalia.annotations.JsonSetter;
 import net.etalia.jalia.annotations.JsonInclude.Include;
+import net.etalia.jalia.annotations.JsonSetter;
 
 @JsonIgnoreProperties({"hidden1","hidden2"})
 @JsonDefaultFields("both")
@@ -63,7 +62,6 @@ public class DummyAnnotations {
 	public String getGetOnly() {
 		return getOnly;
 	}
-	@JsonIgnore
 	public void setGetOnly(String getOnly) {
 		this.getOnly = getOnly;
 	}
@@ -76,8 +74,7 @@ public class DummyAnnotations {
 	public void setGetOnlyByGetter(String getOnlyByGetter) {
 		this.getOnlyByGetter = getOnlyByGetter;
 	}
-	
-	@JsonIgnore
+
 	public String getSetOnly() {
 		return setOnly;
 	}
@@ -147,7 +144,7 @@ public class DummyAnnotations {
 		return inclAlways;
 	}
 	public void setInclAlways(List<String> evenIfEmpty) {
-		this.inclAlways = evenIfEmpty;
+		inclAlways = evenIfEmpty;
 	}
 
 	@JsonInclude(Include.NOT_EMPTY)

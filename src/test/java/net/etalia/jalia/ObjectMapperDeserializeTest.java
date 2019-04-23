@@ -9,16 +9,15 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
-import java.util.*;
-
-import net.etalia.jalia.ObjectMapper;
-import net.etalia.jalia.TypeUtil;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import net.etalia.jalia.DummyAddress.AddressType;
-
-import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -749,6 +748,28 @@ public class ObjectMapperDeserializeTest extends TestBase {
 		String json = "{'@entity':'Person','balance':70000.00}";
 		DummyPerson person = om.readValue(json.replace("'", "\""), DummyPerson.class);
 		assertTrue(person.getBalance().compareTo(new BigDecimal("70000.00")) == 0);
+	}
+
+	@Test
+	public void doNotUpdateWhenIgnoreIsSetOnly() {
+		DummyAnnotations bean = new DummyAnnotations();
+		bean.setSetOnly("thevalue");
+		ObjectMapper mapper = new ObjectMapper();
+
+		mapper.readValue("{'setOnly':'newvalue'}".replace("'", "\""), bean);
+
+		checkThat(bean.getSetOnly(), equalTo("thevalue"));
+	}
+
+	@Test
+	public void updateWhenIgnoreIsGetOnly() {
+		DummyAnnotations bean = new DummyAnnotations();
+		bean.setGetOnly("thevalue");
+		ObjectMapper mapper = new ObjectMapper();
+
+		mapper.readValue("{'getOnly':'newvalue'}".replace("'", "\""), bean);
+
+		checkThat(bean.getGetOnly(), equalTo("newvalue"));
 	}
 
 }

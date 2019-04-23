@@ -706,4 +706,31 @@ public class ObjectMapperSerializeTest extends TestBase {
 				"@entity", "Address", "id", "2", "Altra", "}"
 		)));
 	}
+
+	@Test
+	public void serializeWhenIgnoreIsSetOnly() {
+		DummyAnnotations bean = new DummyAnnotations();
+		bean.setSetOnly("thevalue");
+		ObjectMapper mapper = new ObjectMapper();
+		OutField of = OutField.getRoot("setOnly");
+
+		String json = mapper.writeValueAsString(bean, of);
+
+		checkThat(json, stringContainsInOrder(Arrays.asList(
+				"setOnly",
+				"thevalue"
+		)));
+	}
+
+	@Test
+	public void doNotSerializeWhenIgnoreIsSetOnly() {
+		DummyAnnotations bean = new DummyAnnotations();
+		bean.setGetOnly("thevalue");
+		ObjectMapper mapper = new ObjectMapper();
+		OutField of = OutField.getRoot("getOnly");
+
+		String json = mapper.writeValueAsString(bean, of);
+
+		checkThat(json, not(containsString("thevalue")));
+	}
 }

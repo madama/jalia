@@ -12,9 +12,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import net.etalia.jalia.annotations.*;
+import net.etalia.jalia.annotations.JsonAllowEntityPropertyChanges;
+import net.etalia.jalia.annotations.JsonAllowNewInstances;
+import net.etalia.jalia.annotations.JsonCollection;
+import net.etalia.jalia.annotations.JsonDefaultFields;
+import net.etalia.jalia.annotations.JsonGetter;
+import net.etalia.jalia.annotations.JsonIgnore;
+import net.etalia.jalia.annotations.JsonIgnoreProperties;
+import net.etalia.jalia.annotations.JsonInclude;
 import net.etalia.jalia.annotations.JsonInclude.Include;
+import net.etalia.jalia.annotations.JsonMap;
+import net.etalia.jalia.annotations.JsonOnDemandOnly;
+import net.etalia.jalia.annotations.JsonRequireIdForReuse;
+import net.etalia.jalia.annotations.JsonSetter;
 import net.etalia.utils.MissHolder;
 
 public class JsonClassData {
@@ -69,14 +79,14 @@ public class JsonClassData {
 	protected boolean isNew = true;
 	
 	protected JsonClassData(JsonClassData other) {
-		this.clazz = other.clazz;
-		this.defaults.addAll(other.defaults);
-		this.getters.putAll(other.getters);
-		this.setters.putAll(other.setters);
-		this.ondemand.putAll(other.ondemand);
-		this.allGetters.putAll(other.allGetters);
-		this.allSetters.putAll(other.allSetters);
-		this.options.putAll(other.options);
+		clazz = other.clazz;
+		defaults.addAll(other.defaults);
+		getters.putAll(other.getters);
+		setters.putAll(other.setters);
+		ondemand.putAll(other.ondemand);
+		allGetters.putAll(other.allGetters);
+		allSetters.putAll(other.allSetters);
+		options.putAll(other.options);
 	}
 	
 	protected JsonClassData(Class<?> clazz) {
@@ -95,7 +105,7 @@ public class JsonClassData {
 	 * Set this JsonClassData as not new anymore.
 	 */
 	public void unsetNew() {
-		this.isNew = false;
+		isNew = false;
 	}
 
 	/**
@@ -116,7 +126,7 @@ public class JsonClassData {
 		{
 			JsonDefaultFields defaultfields = c.getAnnotation(JsonDefaultFields.class);
 			if (defaultfields != null) {
-				this.defaults.addAll(Arrays.asList(defaultfields.value().split(",")));
+				defaults.addAll(Arrays.asList(defaultfields.value().split(",")));
 			}
 		}
 		// TODO parse JsonTypeInfo
@@ -155,7 +165,7 @@ public class JsonClassData {
 		Map<String, Object> globs = new HashMap<String, Object>();
 		parseOptions(clazz, globs);
 		if (globs.size() > 0) {
-			for (Entry<String, Map<String, Object>> entry : this.options.entrySet()) {
+			for (Entry<String, Map<String, Object>> entry : options.entrySet()) {
 				Map<String, Object> mopts = entry.getValue();
 				if (mopts == null) {
 					entry.setValue(new HashMap<String, Object>(globs));
@@ -210,10 +220,14 @@ public class JsonClassData {
 				name = name.substring(3);
 			}
 			name = decapitalize(name);
-			if (ignore.contains(name) && !explicitSet && (ignoreAnn == null || ignoreAnn.value())) return "!" + name;
+			if (ignore.contains(name) && !explicitSet) {
+				return "!" + name;
+			}
 		}
-		if (ignoreAnn != null && ignoreAnn.value()) {
-			ignore.add(name);
+		if (ignoreAnn != null) {
+			if (ignoreAnn.value()) {
+				ignore.add(name);
+			}
 			return "!"+name;
 		}		
 		return name;
@@ -248,13 +262,13 @@ public class JsonClassData {
 		// Get options
 		String name = methodName(method, ignore);
 		String baseName = name.startsWith("!") ? name.substring(1) : name;
-		Map<String,Object> opts = this.options.get(baseName); 
+		Map<String, Object> opts = options.get(baseName);
 		if (opts == null) opts = new HashMap<String, Object>();
 		parseOptions(method, opts);
 		if (!opts.isEmpty()) {
-			this.options.put(baseName, opts);
+			options.put(baseName, opts);
 		} else {
-			this.options.put(baseName, null);
+			options.put(baseName, null);
 		}
 		
 		method.setAccessible(true);
@@ -262,23 +276,27 @@ public class JsonClassData {
 		if (name.startsWith("!")) {
 			allGetters.put(baseName, method);
 			// Check if to remove also the setter
-			Method setter = this.setters.get(baseName);
+			Method setter = setters.get(baseName);
 			if (setter != null) {
 				if (methodName(setter, ignore).startsWith("!")) {
-					this.setters.remove(baseName);
+					setters.remove(baseName);
 				}
 			}
 			return;
 		}
 		allGetters.put(name, method);
-		if (this.ondemand.containsKey(name)) return;
+		if (ondemand.containsKey(name)) {
+			return;
+		}
 		JsonOnDemandOnly onDemandAnn = method.getAnnotation(JsonOnDemandOnly.class);
 		if (onDemandAnn != null) {
-			this.ondemand.put(name, method);
-			this.getters.remove(name);
+			ondemand.put(name, method);
+			getters.remove(name);
 		} else {
-			if (this.getters.containsKey(name)) return;
-			this.getters.put(name, method);
+			if (getters.containsKey(name)) {
+				return;
+			}
+			getters.put(name, method);
 		}
 	}
 
@@ -339,28 +357,30 @@ public class JsonClassData {
 		method.setAccessible(true);
 		String name = methodName(method, ignore);
 		String baseName = name.startsWith("!") ? name.substring(1) : name;
-		Map<String,Object> opts = this.options.get(baseName);
+		Map<String, Object> opts = options.get(baseName);
 		if (opts == null) opts = new HashMap<String, Object>();
 		parseOptions(method, opts);
 		if (!opts.isEmpty()) {
-			this.options.put(baseName, opts);
+			options.put(baseName, opts);
 		} else {
-			this.options.put(baseName, null);
+			options.put(baseName, null);
 		}
 		if (name.startsWith("!")) {
 			allSetters.put(baseName, method);
 			// Check if to remove also the setter
-			Method getter = this.getters.get(baseName);
+			Method getter = getters.get(baseName);
 			if (getter != null) {
 				if (methodName(getter, ignore).startsWith("!")) {
-					this.getters.remove(baseName);
+					getters.remove(baseName);
 				}
 			}
 			return;
 		}
 		allSetters.put(name, method);
-		if (this.setters.containsKey(name)) return;
-		this.setters.put(name, method);
+		if (setters.containsKey(name)) {
+			return;
+		}
+		setters.put(name, method);
 	}
 
 	/**
@@ -382,9 +402,13 @@ public class JsonClassData {
 	 * an error occurs.
 	 */
 	public Object getValue(String name, Object obj, boolean force) {
-		Method method = this.getters.get(name);
-		if (method == null) method = this.ondemand.get(name);
-		if (method == null && force) method = this.allGetters.get(name);
+		Method method = getters.get(name);
+		if (method == null) {
+			method = ondemand.get(name);
+		}
+		if (method == null && force) {
+			method = allGetters.get(name);
+		}
 		// TODO log this?
 		if (method == null) return null;
 		try {
@@ -399,41 +423,41 @@ public class JsonClassData {
 	 * @return a set of all visible property names that can be read.
 	 */
 	public Set<String> getGettables() {
-		return this.getters.keySet();
+		return getters.keySet();
 	}
 
 	/**
 	 * @return a sorted list of all visible property names that can be read.
 	 */
 	public List<String> getSortedGettables() {
-		ArrayList<String> ret = new ArrayList<String>(this.getters.keySet());
+		ArrayList<String> ret = new ArrayList<String>(getters.keySet());
 		Collections.sort(ret);
 		return ret;
 	}
 
 	public Set<String> getOnDemandGettables() {
-		return this.ondemand.keySet();
+		return ondemand.keySet();
 	}
 
 	/**
 	 * @return a set of all visible property names that can be written.
 	 */
 	public Set<String> getSettables() {
-		return this.setters.keySet();
+		return setters.keySet();
 	}
 
 	/**
 	 * @return a set of default properties to serialize, or only the value "*" if no defaults were specified.
 	 */
 	public Set<String> getDefaults() {
-		return this.defaults.size() > 0 ? this.defaults : ALL_SET;
+		return defaults.size() > 0 ? defaults : ALL_SET;
 	}
 
 	/**
 	 * @return the Class being handled by this JsonClassData.
 	 */
 	public Class<?> getTargetClass() {
-		return this.clazz;
+		return clazz;
 	}
 
 	/**
@@ -441,7 +465,7 @@ public class JsonClassData {
 	 * @param string the name of the property whose setter must be ignored.
 	 */
 	public void ignoreSetter(String string) {
-		this.setters.remove(string);
+		setters.remove(string);
 	}
 
 	/**
@@ -449,7 +473,7 @@ public class JsonClassData {
 	 * @param string the name of the property whose getter must be ignored.
 	 */
 	public void ignoreGetter(String string) {
-		this.getters.remove(string);
+		getters.remove(string);
 	}
 
 	/**
@@ -504,8 +528,10 @@ public class JsonClassData {
 	 * @return true if setting the value was successful, false otherwise.
 	 */
 	public boolean setValue(String name, Object nval, Object tgt, boolean force) {
-		Method method = this.setters.get(name);
-		if (method == null && force) method = this.allSetters.get(name);
+		Method method = setters.get(name);
+		if (method == null && force) {
+			method = allSetters.get(name);
+		}
 		// TODO log this?
 		if (method == null) return false;
 		try {
@@ -523,6 +549,6 @@ public class JsonClassData {
 	 * @return de-serialization options for the property, if any.
 	 */
 	public Map<String,Object> getOptions(String name) {
-		return this.options.get(name);
+		return options.get(name);
 	}
 }

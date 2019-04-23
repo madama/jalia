@@ -8,14 +8,8 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.*;
 
-import net.etalia.jalia.JsonClassData;
-import net.etalia.jalia.JsonContext;
-import net.etalia.jalia.ObjectMapper;
 import net.etalia.jalia.DummyAddress.AddressType;
-
-import org.junit.Before;
 import org.junit.Test;
 
 public class JsonClassDataTest extends TestBase {
@@ -97,9 +91,13 @@ public class JsonClassDataTest extends TestBase {
 	
 		{
 			JsonClassData jcd = factory.getClassData(DummyAnnotations.class, null);
-			
-			checkThat(jcd.getGettables(), containsInAnyOrder("both","getOnly","getOnlyByGetter","unusual","alternative","objBoolean","natBoolean","inclAlways","inclNotNull","inclNotEmpty"));
-			checkThat(jcd.getSettables(), containsInAnyOrder("both","setOnly","setOnlyBySetter","unusual","alternative","objBoolean","natBoolean","inclAlways","inclNotNull","inclNotEmpty"));
+
+			checkThat(jcd.getGettables(),
+					containsInAnyOrder("both", "setOnly", "getOnlyByGetter", "unusual", "alternative", "objBoolean",
+							"natBoolean", "inclAlways", "inclNotNull", "inclNotEmpty"));
+			checkThat(jcd.getSettables(),
+					containsInAnyOrder("both", "getOnly", "setOnlyBySetter", "unusual", "alternative", "objBoolean",
+							"natBoolean", "inclAlways", "inclNotNull", "inclNotEmpty"));
 			checkThat(jcd.getDefaults(), containsInAnyOrder("both"));
 			
 			checkThat(jcd.getSetHint("alternative").getConcrete(), equalTo((Class)Integer.TYPE));
@@ -110,8 +108,13 @@ public class JsonClassDataTest extends TestBase {
 		}		
 		{
 			JsonClassData jcd = factory.getClassData(DummyClassAnnotations.class, null);
-			
-			checkThat(jcd.getGettables(), containsInAnyOrder("both","getOnly","getOnlyByGetter","unusual","alternative","objBoolean","natBoolean","inclAlways","inclNotNull","inclNotEmpty"));
+
+			checkThat(jcd.getGettables(),
+					containsInAnyOrder("both", "setOnly", "getOnlyByGetter", "unusual", "alternative", "objBoolean",
+							"natBoolean", "inclAlways", "inclNotNull", "inclNotEmpty"));
+			checkThat(jcd.getSettables(),
+					containsInAnyOrder("both", "getOnly", "setOnlyBySetter", "unusual", "alternative", "objBoolean",
+							"natBoolean", "inclAlways", "inclNotNull", "inclNotEmpty"));
 			checkThat(jcd.getOptions("both"), hasEntry(DefaultOptions.INCLUDE_NULLS.toString(), (Object)true));
 			checkThat(jcd.getOptions("both"), hasEntry(DefaultOptions.INCLUDE_EMPTY.toString(), (Object)true));
 		}		
