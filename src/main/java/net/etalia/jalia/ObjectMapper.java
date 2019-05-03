@@ -17,9 +17,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.PostConstruct;
-
 import net.etalia.jalia.stream.JsonReader;
 import net.etalia.jalia.stream.JsonToken;
 import net.etalia.jalia.stream.JsonWriter;
@@ -65,7 +63,7 @@ public class ObjectMapper {
 	/**
 	 * Entity name provider used in this ObjectMapper.
 	 */
-	private EntityNameProvider entityNameProvider = null;
+	private EntityNameProvider entityNameProvider = new FullNameEntityNameProvider();
 
 	/**
 	 * Class data factory used in this ObjectMapper.
@@ -116,7 +114,7 @@ public class ObjectMapper {
 	 */
 	// TODO support more than one factory or cascading factories, and/or a factory that self configures based on typeinfo annotations
 	public ObjectMapper setEntityFactory(EntityFactory entityFactory) {
-		this.entityProvider = entityFactory;
+		entityProvider = entityFactory;
 		return this;
 	}
 
@@ -225,6 +223,9 @@ public class ObjectMapper {
 	 * @return the same or a new instance of {@link JsonReader}.
 	 */
 	protected JsonReader configureReader(JsonReader reader) {
+		if ((Boolean) defaultOptions.get(DefaultOptions.LENIENT_READER.toString())) {
+			reader.setLenient(true);
+		}
 		return reader;
 	}
 
@@ -361,7 +362,7 @@ public class ObjectMapper {
 		init();
 		configureWriter(jsonOut);
 		JsonContext ctx = createContext();
-		ctx.initInheritStack(this.defaultOptions);
+		ctx.initInheritStack(defaultOptions);
 		ctx.setOutput(jsonOut);
 		if (fields == null) fields = new OutField(true);
 		ctx.setRootFields(fields);
@@ -383,7 +384,7 @@ public class ObjectMapper {
 		init();
 		configureReader(jsonIn);
 		JsonContext ctx = createContext();
-		ctx.initInheritStack(this.defaultOptions);
+		ctx.initInheritStack(defaultOptions);
 		ctx.setInput(jsonIn);
 		boolean valid;
 		try {
@@ -422,7 +423,7 @@ public class ObjectMapper {
 		if (deser == null) throw new JaliaException("Cannot find a JSON deserializer for " + pre + " " + hint + " at " + ctx.getStateLog());
 		try {
 			Object ret = deser.deserialize(ctx, pre, hint);
-			this.cacheDeserializerFor(hint, deser);
+			cacheDeserializerFor(hint, deser);
 			return ret;
 		} catch (Throwable t) {
 			if (t instanceof JaliaException) throw (JaliaException)t;

@@ -1,13 +1,18 @@
 package net.etalia.jalia;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.sameInstance;
+
+import java.util.HashMap;
+import java.util.Map;
 import net.etalia.jalia.annotations.JsonAllowNewInstances;
 import net.etalia.jalia.annotations.JsonMap;
 import org.junit.Before;
 import org.junit.Test;
-import static org.hamcrest.Matchers.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class MapJsonDeSerTest extends TestBase {
 
@@ -178,5 +183,18 @@ public class MapJsonDeSerTest extends TestBase {
         checkThat(existing.getData(), hasEntry("v2", (Object)"v2"));
         checkThat(existing.getData(), not(hasEntry("v1", (Object)"v1")));
         checkThat(existing.getData(), not(sameInstance(preData)));
+    }
+
+    @Test
+    public void shouldDeserializeMixedStuff() {
+        Basic existing = new Basic();
+        Map<String, Object> preData = existing.getData();
+
+        mapper.readValue("{'data':{'int':1, 'long': 12345678910100, 'string': 'abc'}}".replace("'", "\""), existing,
+                Basic.class);
+
+        checkThat(existing.getData(), hasEntry("int", (Object) 1));
+        checkThat(existing.getData(), hasEntry("long", (Object) 12345678910100L));
+        checkThat(existing.getData(), hasEntry("string", (Object) "abc"));
     }
 }
