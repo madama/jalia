@@ -82,6 +82,7 @@ public class ObjectMapper {
 	
 	{
 		defaultOptions.put(DefaultOptions.PRETTY_PRINT.toString(), false);
+		defaultOptions.put(DefaultOptions.LENIENT_READER.toString(), false);
 		defaultOptions.put(DefaultOptions.INCLUDE_EMPTY.toString(), false);
 		defaultOptions.put(DefaultOptions.INCLUDE_NULLS.toString(), false);
 		defaultOptions.put(DefaultOptions.RECORD_CHANGES.toString(), true);
