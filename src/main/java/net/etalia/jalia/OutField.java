@@ -1,7 +1,13 @@
 package net.etalia.jalia;
 
 import java.io.Reader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Holds which fields are required to be serialized.
@@ -127,7 +133,9 @@ public class OutField {
 	 * @return the definition for the field, or null if not found
 	 */
 	public OutField getCreateSub(String name) {
-		if (all) throw new IllegalStateException("Can't add sub fields to *");
+		if (all) {
+			throw new IllegalStateException("Can't add sub fields to * on " + getFullPath());
+		}
 		if (subs == null) {
 			subs = new HashMap<>();
 		}
@@ -143,8 +151,8 @@ public class OutField {
 			// to rectify the syntax "father.*" where ".*" is not a subfield but the declaration that "father" should
 			// have "all=true".
 			if (mname.equals("*")) {
-				this.all = true;
-				this.explicit = true;
+				all = true;
+				explicit = true;
 				ret = this;
 			} else {
 				ret = new OutField(this, mname);
@@ -184,9 +192,11 @@ public class OutField {
 	 * @return the "fully qualified" path, similar to the one used in the original definition, of this OutField.
 	 */
 	protected String getFullPath() {
-		if (this.parent == null) return null;
-		String pfp = this.parent.getFullPath();
-		return (pfp != null ? (pfp + ".") : "") + this.name;
+		if (parent == null) {
+			return null;
+		}
+		String pfp = parent.getFullPath();
+		return (pfp != null ? (pfp + ".") : "") + name;
 	}
 
 	/**
@@ -194,7 +204,7 @@ public class OutField {
 	 * defaults should be used.
 	 */
 	public boolean hasSubs() {
-		return (this.all && this.explicit) || (subs != null && subs.size() > 0);
+		return (all && explicit) || (subs != null && subs.size() > 0);
 	}
 
 	/**
@@ -264,7 +274,7 @@ public class OutField {
 	 *             "otherGroup": "field1,field2"
 	 *         }
 	 *     </code>
-	 *     As well as nexted objects:
+	 *     As well as nested objects:
 	 *     <code>
 	 *         {
 	 *             "groupName": {
@@ -309,6 +319,10 @@ public class OutField {
 		}
 	}
 
+	public static void cleanGroups() {
+		groups.clear();
+	}
+
 	private static void recurseParseGroupJson(Object value, String prefix, List<String> definitions) {
 		if (value instanceof Boolean) {
 			definitions.add(prefix.substring(0, prefix.length() - 1));
@@ -332,8 +346,10 @@ public class OutField {
 	 * @return list of defined children
 	 */
 	public Set<String> getSubsNames() {
-		if (this.subs == null) return Collections.emptySet();
-		return Collections.unmodifiableSet(this.subs.keySet());
+		if (subs == null) {
+			return Collections.emptySet();
+		}
+		return Collections.unmodifiableSet(subs.keySet());
 	}
 
 	/**
@@ -347,7 +363,7 @@ public class OutField {
 		OutField ret = new OutField(null);
 		ret.subs = new HashMap<>();
 		ret.subs.put(name, this);
-		this.parent = ret;
+		parent = ret;
 		return ret;
 	}
 
@@ -360,12 +376,12 @@ public class OutField {
 	// TODO remove?
 	public OutField reparentSubs(String name) {
 		OutField nc = new OutField(this, name);
-		nc.subs = new HashMap<>(this.subs);
+		nc.subs = new HashMap<>(subs);
 		for (OutField sub : nc.subs.values()) {
 			sub.parent = nc;
 		}
-		this.subs.clear();
-		this.subs.put(name, nc);
+		subs.clear();
+		subs.put(name, nc);
 		return nc;
 	}
 
