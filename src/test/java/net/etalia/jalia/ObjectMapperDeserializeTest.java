@@ -718,6 +718,7 @@ public class ObjectMapperDeserializeTest extends TestBase {
 		DummyEntityProvider ep = new DummyEntityProvider();
 		ep.addToDb(new DummyAddress("a4", AddressType.EMAIL, "a@b.com"));
 		ObjectMapper om = new ObjectMapper();
+		om.setEntityNameProvider(null);
 		om.setEntityFactory(ep);
 		String json = 
 				"{" +
@@ -745,6 +746,7 @@ public class ObjectMapperDeserializeTest extends TestBase {
 	@Test
 	public void bigDecimal() throws Exception {
 		ObjectMapper om = new ObjectMapper();
+		om.setEntityNameProvider(null);
 		String json = "{'@entity':'Person','balance':70000.00}";
 		DummyPerson person = om.readValue(json.replace("'", "\""), DummyPerson.class);
 		assertTrue(person.getBalance().compareTo(new BigDecimal("70000.00")) == 0);
