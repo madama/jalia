@@ -293,11 +293,11 @@ public class OutField {
 	 *     As well as mixed:
 	 *     <code>
 	 *         {
-	 *             "groupName": {
+	 *             "groupName": [
 	 *                 ["field1","field2"],
-	 *                 "link": ["field1","field2"],
-	 *                 "otherLink": "*"
-	 *             }
+	 *                 {"link": ["field1","field2"]},
+	 *                 {"otherLink": "*"}
+	 *             ]
 	 *         }
 	 *     </code>
 	 * </p>
@@ -329,6 +329,7 @@ public class OutField {
 		} else if (value instanceof String) {
 			String[] segments = ((String) value).split(",");
 			for (String segment : segments) {
+				segment = segment.trim();
 				definitions.add(prefix + segment);
 			}
 		} else if (value instanceof Iterable) {
@@ -337,7 +338,13 @@ public class OutField {
 			}
 		} else if (value instanceof Map) {
 			for (Map.Entry<String, Object> entry : ((Map<String,Object>) value).entrySet()) {
-				recurseParseGroupJson(entry.getValue(), prefix + entry.getKey() + ".", definitions);
+				String key = entry.getKey().trim();
+				if (key.equals("__")) {
+					key = "";
+				} else {
+					key = key + ".";
+				}
+				recurseParseGroupJson(entry.getValue(), prefix + key, definitions);
 			}
 		}
 	}
