@@ -1,8 +1,11 @@
 package net.etalia.jalia;
 
 import java.io.IOException;
-import java.util.*;
-
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import net.etalia.jalia.annotations.JsonMap;
 import net.etalia.jalia.stream.JsonReader;
 import net.etalia.jalia.stream.JsonToken;
@@ -126,15 +129,12 @@ public class MapJsonDeSer implements JsonDeSer {
 			context.putLocalStack(BeanJsonDeSer.ALLOW_CHANGES, wasAllowChanges);
 			keys.add(name);
 			Object preval = read.get(name);
-			TypeUtil useHint = inner;
-			if (preval != null) {
-				useHint = TypeUtil.get(preval.getClass());
-				if (inner != null && !inner.isParentOf(useHint)) {
-					useHint = inner;
-				}
-			}
+			// NOTE: explicitly avoiding inferring a hint from the existing value cause it causes more problems than
+			// other, for example ina free Map<String,Object>, values of one type cannot be changed to another type
+			// if hint is inferred, causing deserialization errors, where the purpose of such a map is to be totally
+			// flexible.
 			try {
-				Object val = context.getMapper().readValue(context, preval, useHint);
+				Object val = context.getMapper().readValue(context, preval, inner);
 				val = reduceNumber(val);
 				try {
 					act.put(name, val);

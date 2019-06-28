@@ -3,6 +3,7 @@ package net.etalia.jalia;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.sameInstance;
@@ -122,32 +123,35 @@ public class MapJsonDeSerTest extends TestBase {
     }
 
     @Test
-    public void shouldInferHintFromType() {
-        Basic existing = new Basic();
-        Map<String, Object> preData = existing.getData();
-        Basic preChild = new Basic();
-        preChild.getData().put("c1", "c1");
-        existing.getData().put("v1", preChild);
-
-        mapper.readValue("{'data':{'v2':'v2', 'v1': {'data': { 'c2':'c2' }}}}".replace("'","\""),
-                existing, Basic.class);
-
-        checkThat(existing.getData(), hasEntry("v2", (Object)"v2"));
-        checkThat(existing.getData().get("v1"), notNullValue());
-        checkThat(existing.getData().get("v1"), sameInstance((Object)preChild));
-        checkThat(((Basic)existing.getData().get("v1")).getData(), hasEntry("c2", (Object)"c2"));
-        checkThat(((Basic)existing.getData().get("v1")).getData(), not(hasEntry("c1", (Object)"c1")));
-        checkThat(existing.getData(), sameInstance(preData));
-    }
-
-    @Test
-    public void shouldInferHintFromMap() {
+    public void shouldInferHintFromMapDeclaration() {
         Chained existing = new Chained();
         mapper.readValue("{'data':{'v1': {'name': 'test'}}}".replace("'","\""),
                 existing, Chained.class);
 
         checkThat(existing.getData().get("v1"), notNullValue());
         checkThat(existing.getData().get("v1").getName(), equalTo("test"));
+    }
+
+    @Test
+    public void shouldIgnoreInferredHintIfError() {
+        Basic existing = new Basic();
+        existing.getData().put("v1", "ciao");
+        mapper.readValue("{'data':{'v1': {'name': 'test'}}}".replace("'", "\""),
+                existing);
+
+        checkThat(existing.getData().get("v1"), notNullValue());
+        checkThat(existing.getData().get("v1"), instanceOf(Map.class));
+    }
+
+    @Test
+    public void shouldPopulatePreviouslyEmptyObject() {
+        Basic existing = new Basic();
+        mapper.readValue("{'data':{'v1': {}, 'v2':'ciao'}}".replace("'", "\""), existing);
+        mapper.readValue("{'data':{'v1': {'name': 'test'}}}".replace("'", "\""), existing);
+
+        checkThat(existing.getData().get("v1"), notNullValue());
+        checkThat(existing.getData().get("v1"), instanceOf(Map.class));
+        checkThat(((Map) existing.getData().get("v1")).get("name"), equalTo((Object) "test"));
     }
 
     @Test

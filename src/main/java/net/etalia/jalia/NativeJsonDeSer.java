@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import net.etalia.jalia.stream.JsonReader;
 import net.etalia.jalia.stream.JsonToken;
 import net.etalia.jalia.stream.JsonWriter;
@@ -134,17 +133,17 @@ public class NativeJsonDeSer implements JsonDeSer {
 		}
 		if (peek == JsonToken.STRING) {
 			ret = input.nextString();
-			// A string could be an enum
-			if (hint != null) {
+			// A string could be an enum, a class, a number or a date
+			if (hint != null && hint.hasConcrete()) {
 				if (hint.isEnum()) {
 					ret = hint.getEnumValue((String)ret);
-				} else if (hint.hasConcrete() && Class.class.isAssignableFrom(hint.getConcrete())) {
+				} else if (Class.class.isAssignableFrom(hint.getConcrete())) {
 					try {
 						ret = Class.forName((String) ret);
 					} catch (ClassNotFoundException e) {
 						throw new IllegalStateException("Cannot deserialize a class " + ret + " at " + context.getStateLog(), e);
 					}
-				} else if (hint.hasConcrete() && UUID.class.isAssignableFrom(hint.getConcrete())) {
+				} else if (UUID.class.isAssignableFrom(hint.getConcrete())) {
 					ret = UUID.fromString((String)ret);
 				} else if (!hint.isCharSequence()) {
 					if (hint.isNumber() || hint.isBoolean()) {
