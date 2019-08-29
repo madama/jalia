@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import net.etalia.jalia.annotations.JsonMap;
@@ -112,7 +113,8 @@ public class MapJsonDeSer implements JsonDeSer {
 		}
 
 		if (act == null || context.getFromStackBoolean(DROP)) {
-			act = new HashMap<>();
+			// Use linked hash map to keep the order where posible
+			act = new LinkedHashMap<>();
 		} else if (context.getFromStackBoolean(CLEAR)) {
 			act.clear();
 		}
