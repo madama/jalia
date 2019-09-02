@@ -412,11 +412,24 @@ public class JsonClassData {
 		// TODO log this?
 		if (method == null) return null;
 		try {
-			return method.invoke(obj);
+			return getValue(name, obj, method);
 		} catch (Throwable e) {
 			// TODO log this?
 			return null;
 		}
+	}
+
+	/**
+	 * Here a subclass can hook to control whatever is being serialized (or read for deserialization in case of
+	 * collections).
+	 *
+	 * @param name the name of the field
+	 * @param target the target entity
+	 * @param method the method (getter) to be called
+	 * @return the value to be used
+	 */
+	protected Object getValue(String name, Object target, Method method) throws Exception {
+		return method.invoke(target);
 	}
 
 	/**
@@ -533,14 +546,27 @@ public class JsonClassData {
 			method = allSetters.get(name);
 		}
 		// TODO log this?
-		if (method == null) return false;
+		if (method == null)
+			return false;
 		try {
-			method.invoke(tgt, nval);
+			setValue(name, tgt, method, nval);
 		} catch (Throwable e) {
 			// TODO log this?
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Here a subclass can hook to control whatever is being written to an entity.
+	 *
+	 * @param name the name of the field
+	 * @param target the target entity
+	 * @param method the method (setter) to be called
+	 * @param value the value to set
+	 */
+	protected void setValue(String name, Object target, Method method, Object value) throws Exception {
+		method.invoke(target, value);
 	}
 
 	/**
