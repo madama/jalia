@@ -332,16 +332,18 @@ public class BeanJsonDeSer implements JsonDeSer {
 			}
 			dones.put(id.toString(), pre);
 		}
-		Set<String> settables = cd.getSettables();
-		boolean override = context.getFromStackBoolean(DefaultOptions.OVERRIDE_IGNORES.toString());
+        Set<String> allow = new HashSet<>(cd.getSettables());
+        allow.addAll(cd.getGettables());
 		while (input.hasNext()) {
 			String name = input.nextName();
-			if (!(settables.contains(name) || override)) {
-				input.skipValue();
-				continue;
-			}
-			context.deserializationEntering(name);
-			context.putLocalStack(cd.getOptions(name));
+            context.deserializationEntering(name);
+            context.putLocalStack(cd.getOptions(name));
+            boolean override = context.getFromStackBoolean(DefaultOptions.OVERRIDE_IGNORES.toString());
+            if (!(allow.contains(name) || override)) {
+                input.skipValue();
+                context.deserializationExited();
+                continue;
+            }
 			Object preval = null;
 			TypeUtil hintval = cd.getSetHint(name);
 			if (hintval == null) hintval = cd.getGetHint(name);
