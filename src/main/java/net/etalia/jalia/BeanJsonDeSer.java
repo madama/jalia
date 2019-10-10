@@ -332,8 +332,14 @@ public class BeanJsonDeSer implements JsonDeSer {
 			}
 			dones.put(id.toString(), pre);
 		}
+		Set<String> settables = cd.getSettables();
+		boolean override = context.getFromStackBoolean(DefaultOptions.OVERRIDE_IGNORES.toString());
 		while (input.hasNext()) {
 			String name = input.nextName();
+			if (!(settables.contains(name) || override)) {
+				input.skipValue();
+				continue;
+			}
 			context.deserializationEntering(name);
 			context.putLocalStack(cd.getOptions(name));
 			Object preval = null;
@@ -342,7 +348,7 @@ public class BeanJsonDeSer implements JsonDeSer {
 			preval = cd.getValue(name, pre);
 			try {
 				Object nval = context.getMapper().readValue(context, preval, hintval);
-				cd.setValue(name, nval, pre, context.getFromStackBoolean(DefaultOptions.OVERRIDE_IGNORES.toString()));
+				cd.setValue(name, nval, pre, override);
 				if (context.getFromStackBoolean(DefaultOptions.RECORD_CHANGES.toString())) {
 					Object originalValue = context.getFromStack(CTX_ALL_ORIGINAL_VALUE);
 					if (originalValue == null) {
