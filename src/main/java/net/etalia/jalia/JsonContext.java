@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
-
 import net.etalia.jalia.stream.JsonReader;
 import net.etalia.jalia.stream.JsonWriter;
 
@@ -294,8 +293,8 @@ public class JsonContext extends HashMap<String, Object>{
 	 */
 	// TODO move to constructor?
 	public void setRootFields(OutField rootField) {
-		this.rootFields = rootField;
-		this.currentFields = rootField;
+		rootFields = rootField;
+		currentFields = rootField;
 	}
 
 	/**
@@ -313,7 +312,7 @@ public class JsonContext extends HashMap<String, Object>{
 	 * @return the OutField for the current serialziation step
 	 */
 	public OutField getCurrentFields() {
-		return this.currentFields;
+		return currentFields;
 	}
 
 	/**
@@ -331,7 +330,7 @@ public class JsonContext extends HashMap<String, Object>{
 	 * @return true if the serializer should proceed serializing the field
 	 */
 	public boolean entering(String fieldName, String... defaults) {
-		return this.entering(fieldName, defaults == null ? null : Arrays.asList(defaults));
+		return entering(fieldName, defaults == null ? null : Arrays.asList(defaults));
 	}
 
 	/**
@@ -400,7 +399,7 @@ public class JsonContext extends HashMap<String, Object>{
 	 * @param name name of the property about to be deserialized
 	 */
 	public void deserializationEntering(String name) {
-		this.deserCount++;
+		deserCount++;
 		localStack.push(null);
 		inheritStack.push(null);
 		namesStack.push(name);
@@ -410,7 +409,7 @@ public class JsonContext extends HashMap<String, Object>{
 	 * Used to signal that a deserializer has finished deserializing current property.
 	 */
 	public void deserializationExited() {
-		this.deserCount--;
+		deserCount--;
 		namesStack.pop();
 		localStack.pop();
 		inheritStack.pop();
@@ -448,15 +447,15 @@ public class JsonContext extends HashMap<String, Object>{
 	}
 
 	public JsonContext subForInput(JsonReader newInput) {
-		JsonContext ret = new JsonContext(this.mapper);
-		ret.currentFields = this.currentFields;
-		ret.deserCount = this.deserCount;
-		ret.inheritStack.addAll(this.inheritStack);
+		JsonContext ret = new JsonContext(mapper);
+		ret.currentFields = currentFields;
+		ret.deserCount = deserCount;
+		ret.inheritStack.addAll(inheritStack);
 		ret.input = newInput;
-		ret.localStack.addAll(this.localStack);
-		ret.namesStack.addAll(this.namesStack);
-		ret.output = this.output;
-		ret.rootFields = this.rootFields;
+		ret.localStack.addAll(localStack);
+		ret.namesStack.addAll(namesStack);
+		ret.output = output;
+		ret.rootFields = rootFields;
 		return ret;
 	}
 

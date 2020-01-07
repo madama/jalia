@@ -288,6 +288,7 @@ public class ObjectMapperDeserializeTest extends TestBase {
 		DummyPerson person = (DummyPerson) val;
 		checkThat(person.getBirthDay().getTime(), equalTo(289467082000l));
 	}
+
 	@Test
 	public void entityFromExisting() throws Exception {
 		String json = 

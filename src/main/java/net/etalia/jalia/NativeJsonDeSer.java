@@ -185,6 +185,7 @@ public class NativeJsonDeSer implements JsonDeSer {
 								try {
 									d = javax.xml.bind.DatatypeConverter.parseDateTime(dateStr).getTime();
 								} catch (Exception ignored) {
+									LOG.fine("Tried decoding as ISO8601 but got " + ignored.toString());
 								}
 							}
 							if (dateStr.indexOf('T') != -1 ) {
@@ -192,6 +193,7 @@ public class NativeJsonDeSer implements JsonDeSer {
 									d = new SimpleDateFormat(ISO_FORMAT_1).parse(dateStr);
 									d = new SimpleDateFormat(ISO_FORMAT_2).parse(dateStr);
 								} catch (Exception ignored) {
+									LOG.fine("Tried decoding as ISO8601 partial format but got " + ignored.toString());
 								}
 							}
 							if (d == null) {
