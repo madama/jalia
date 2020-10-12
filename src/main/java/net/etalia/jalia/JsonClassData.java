@@ -70,7 +70,7 @@ public class JsonClassData {
 	/**
 	 * Options for each property, these are built parsing some annotations like for example {@link JsonCollection}.
 	 */
-	protected Map<String,Map<String,Object>> options = new HashMap<String, Map<String,Object>>();
+	protected Map<String, Map<String, Object>> options = new HashMap<>();
 	
 	// Caches
 	protected Map<String,MissHolder<TypeUtil>> getHints = new HashMap<>();
@@ -113,8 +113,8 @@ public class JsonClassData {
 	 * @param c The class to parse.
 	 */
 	private void parse(Class<?> c) {
-		
-		Set<String> ignore = new HashSet<String>();
+
+		Set<String> ignore = new HashSet<>();
 		// Parse JsonIgnoreProperties
 		{
 			JsonIgnoreProperties ignoreAnn = c.getAnnotation(JsonIgnoreProperties.class);
@@ -137,40 +137,46 @@ public class JsonClassData {
 			if (method.isAnnotationPresent(JsonGetter.class)) {
 				parseGetter(method, ignore);
 			}
+		}
+		for (Method method : methods) {
 			if (method.isAnnotationPresent(JsonSetter.class)) {
 				parseSetter(method, ignore);
 			}
 		}
 		// Parse not annotated after
 		for (Method method : methods) {
-			if (!Modifier.isPublic(method.getModifiers())) continue;
-			if (method.getName().startsWith("get") || 
-					(method.getName().startsWith("is") && 
-							(method.getReturnType().equals(Boolean.class) || 
-							method.getReturnType().equals(Boolean.TYPE))
-				)) {
+			if (!Modifier.isPublic(method.getModifiers())) {
+				continue;
+			}
+			if (method.getName().startsWith("get") ||
+					(method.getName().startsWith("is") &&
+							(method.getReturnType().equals(Boolean.class) ||
+									method.getReturnType().equals(Boolean.TYPE))
+					)) {
 				parseGetter(method, ignore);
 			}
+		}
+		for (Method method : methods) {
 			if (method.getName().startsWith("set")) {
 				parseSetter(method, ignore);
 			}
 		}
-		
+
 		Class<?> sup = c.getSuperclass();
 		if (sup != null) parse(sup);
 		Class<?>[] interfaces = c.getInterfaces();
 		for (Class<?> inter : interfaces) parse(inter);
 		
 		// Parse class annotations to fetch options and pass those to all getters
-		Map<String, Object> globs = new HashMap<String, Object>();
+		Map<String, Object> globs = new HashMap<>();
 		parseOptions(clazz, globs);
 		if (globs.size() > 0) {
 			for (Entry<String, Map<String, Object>> entry : options.entrySet()) {
 				Map<String, Object> mopts = entry.getValue();
 				if (mopts == null) {
-					entry.setValue(new HashMap<String, Object>(globs));
+					entry.setValue(new HashMap<>(globs));
 				} else {
-					HashMap<String, Object> nopts = new HashMap<String, Object>(globs);
+					HashMap<String, Object> nopts = new HashMap<>(globs);
 					nopts.putAll(mopts);
 					entry.setValue(nopts);
 				}
@@ -263,7 +269,9 @@ public class JsonClassData {
 		String name = methodName(method, ignore);
 		String baseName = name.startsWith("!") ? name.substring(1) : name;
 		Map<String, Object> opts = options.get(baseName);
-		if (opts == null) opts = new HashMap<String, Object>();
+		if (opts == null) {
+			opts = new HashMap<>();
+		}
 		parseOptions(method, opts);
 		if (!opts.isEmpty()) {
 			options.put(baseName, opts);
@@ -358,7 +366,9 @@ public class JsonClassData {
 		String name = methodName(method, ignore);
 		String baseName = name.startsWith("!") ? name.substring(1) : name;
 		Map<String, Object> opts = options.get(baseName);
-		if (opts == null) opts = new HashMap<String, Object>();
+		if (opts == null) {
+			opts = new HashMap<>();
+		}
 		parseOptions(method, opts);
 		if (!opts.isEmpty()) {
 			options.put(baseName, opts);
@@ -443,7 +453,7 @@ public class JsonClassData {
 	 * @return a sorted list of all visible property names that can be read.
 	 */
 	public List<String> getSortedGettables() {
-		ArrayList<String> ret = new ArrayList<String>(getters.keySet());
+		ArrayList<String> ret = new ArrayList<>(getters.keySet());
 		Collections.sort(ret);
 		return ret;
 	}
