@@ -305,6 +305,7 @@ public class OutField {
 	 */
 	public static void parseGroupsJson(Reader reader) {
 		ObjectMapper om = new ObjectMapper();
+		om.setOption(DefaultOptions.LENIENT_READER, true);
 		Map<String,Object> payload = om.readValue(reader, new TypeUtil.Specific<Map<String, Object>>() {}.type());
 		for (Map.Entry<String, Object> entry : payload.entrySet()) {
 			List<String> definitions = new ArrayList<>();

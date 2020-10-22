@@ -74,7 +74,7 @@ public class OutFieldTest extends TestBase {
 
 	@Test
 	public void shouldParseGroupsJsonSimple() {
-		String groupJson = "{'group': ['prop1','prop2','link1.prop1','link2.*']}".replace("'","\"");
+		String groupJson = "{'group':\n // comment\n ['prop1','prop2','link1.prop1','link2.*']}".replace("'", "\"");
 		OutField.getGroups().clear();
 		OutField.parseGroupsJson(new StringReader(groupJson));
 
