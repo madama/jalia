@@ -93,7 +93,7 @@ public class NativeJsonDeSer implements JsonDeSer {
 		} else if (obj instanceof Class) {
 			output.value(((Class) obj).getName());
 		} else if (obj instanceof UUID) {
-			output.value(((UUID)obj).toString());
+			output.value(obj.toString());
 		} else {
 			throw new IllegalStateException("Cannot serialize " + obj + " at " + context.getStateLog());
 		}
@@ -183,6 +183,7 @@ public class NativeJsonDeSer implements JsonDeSer {
 							Date d = null;
 							if (dateStr.indexOf('-') != -1 ) {
 								try {
+
 									d = javax.xml.bind.DatatypeConverter.parseDateTime(dateStr).getTime();
 								} catch (Exception ignored) {
 									LOG.fine("Tried decoding as ISO8601 but got " + ignored.toString());

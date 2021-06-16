@@ -34,7 +34,7 @@ public class TypeUtil {
 	/**
 	 * Cache of already known type.
 	 */
-	private static final ConcurrentMap<Type, TypeUtil> cache = new ConcurrentHashMap<Type, TypeUtil>();
+	private static final ConcurrentMap<Type, TypeUtil> cache = new ConcurrentHashMap<>();
 
 	/**
 	 * Get the TypeUtil for a {@link Type}, which can be a {@link Class} or a any other Type subinterface,
@@ -206,7 +206,7 @@ public class TypeUtil {
 			returnTypes.put(key, new MissHolder<TypeUtil>(null));
 		} else {
 			ret = get(retType);
-			returnTypes.put(key, new MissHolder<TypeUtil>(ret));
+			returnTypes.put(key, new MissHolder<>(ret));
 		}
 		return ret;
 	}

@@ -7,8 +7,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-
 import net.etalia.jalia.annotations.JsonCollection;
 import net.etalia.jalia.stream.JsonReader;
 import net.etalia.jalia.stream.JsonToken;
@@ -104,7 +102,7 @@ public class ListJsonDeSer implements JsonDeSer {
 		Collection<Object> act;
 		boolean wasArray = (pre != null && pre.getClass().isArray()); 
 		if (pre != null && pre.getClass().isArray()) {
-			act = new ArrayList<Object>();
+			act = new ArrayList<>();
 			for (int i = 0; i < Array.getLength(pre); i++) {
 				act.add(Array.get(pre, i));
 			}
@@ -114,18 +112,10 @@ public class ListJsonDeSer implements JsonDeSer {
 		TypeUtil inner = null;
 		if (act != null) {
 			TypeUtil pretype = TypeUtil.get(pre.getClass());
-			if (pretype.isArray()) {
-				inner = pretype.getArrayType();
-			} else {
-				if (List.class.isAssignableFrom(pretype.getConcrete())) {
-					inner = pretype.findReturnTypeOf("get", Integer.TYPE);
-				} else if (Set.class.isAssignableFrom(pretype.getConcrete())) {
-					inner = pretype.findParameterOf("add", 0);
-				}
-			}
+			inner = pretype.getArrayListOrSetType();
 		}
 
-		Collection<Object> originalValue = null;
+		Collection<Object> originalValue;
 		if (context.getFromStackBoolean(DefaultOptions.RECORD_CHANGES.toString()) && act != null) {
 			originalValue = new ArrayList<>(act);
 			context.putLocalStack(CTX_ALL_ORIGINAL_VALUE, originalValue);
@@ -142,17 +132,11 @@ public class ListJsonDeSer implements JsonDeSer {
 						e.printStackTrace();
 					}
 				}
-				if (hint.isArray()) {
-					inner = hint.getArrayType();
-				} else {
-					if (List.class.isAssignableFrom(hint.getConcrete())) {
-						inner = hint.findReturnTypeOf("get", Integer.TYPE);
-					} else if (Set.class.isAssignableFrom(hint.getConcrete())) {
-						inner = hint.findParameterOf("add", 0);
-					}
-				}				
+				inner = hint.getArrayListOrSetType();
 			}
-			if (act == null) act = new ArrayList<Object>();
+			if (act == null) {
+				act = new ArrayList<>();
+			}
 		}
 		
 		JsonReader input = context.getInput();
